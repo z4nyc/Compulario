@@ -1,0 +1,49 @@
+\section{Errores Computacionales}
+
+Si usted ha intentado realizar una suma de dos números decimales mediante algún lenguaje de programación, podrá haber notado que el resultado no es exactamente correcto
+\begin{sourcecode}{python}{Suma de dos decimales en Python}
+  a = 0.1
+  b = 0.2
+  c = 0.3
+
+  print(f"{a + b == c}")
+  print(f"{a + b}")
+\end{sourcecode}
+Cuyo output será
+
+\begin{sourcecode}{plaintext}{Output}
+  False
+  0.30000000000000004
+\end{sourcecode}
+
+Este error se debe a la manera en que las computadoras deben representar números. En general, los humanos representamos los números en base 10, por ejemplo, escribimos el 325 como
+\begin{equation*}
+  325 = 3\cdot 10^{2} + 2\cdot 10^{1} + 5\cdot 10^{0} = [325]_{10}
+\end{equation*}
+Pero los computadores utilizan bits (0 y 1), por lo que estos representan números en base 2, es decir:
+\begin{equation*}
+  325 = 2^{8} + 2^{6} + 2^{2} + 2^{0} = [101000101]_{2}
+\end{equation*}
+
+Ahora, para representar número reales en el sistema binario, se deben incluir exponentes negativos a la suma de exponentes. En la representación binaria, los números se separan por un exponente y una parte fraccionaria (mantisa) las cuales son separadas por un punto ($.$). Por ejemplo,
+
+\begin{align*}
+  [2.145]_{10} &= 2\cdot 10^{0} + \frac{1}{8} \\
+               &= 2^{1} + 2^{-3} \\
+               &= [10.001]_{2} \\
+               &= [1.0001]_{2} \cdot 2^{1}
+\end{align*}
+
+Este ejemplo en particular funciona bien porque la mantisa del númer decimal resulta ser un exponente de 2, veamos que ocurre para un número más complejo:
+
+\begin{align*}
+  [0.1]_{10} &= [1]_{2}/[1010]_{2} \\
+             &= [0.0\overline{0011}]_{2} \\
+             &= [0.00011001100110011 \cdots] \\
+             &= 2^{-4} + 2^{-5} + 2^{-8} + 2^{-9} + 2^{-12} + 2^{-13} + \cdots \\
+             &= 2^{-4}\cdot (1+ 2^{-1} + 2^{-4} + 2^{-5} + \cdots)
+\end{align*}
+Obtenemos una serie infinita de potencias de dos. Como en la practica los computadores tienen memoria finita es necesario truncar la serie. En general, la mantisa recibe 52 bits, por lo que la serie se trunca hasta el termino $2^{-52}$. en efecto:
+\begin{align*}
+  [0.1]_{10} = 2^{-4}\cdot(1+ 2^{-1} + 2^{-4} + 2^{-5} + \cdots + 2^{-52})
+\end{align*}

@@ -1,4 +1,6 @@
-\section{Errores Computacionales}
+\section{Cálculo Numérico}
+
+\subsection{Errores Computacionales}
 
 Si usted ha intentado realizar una suma de dos números decimales mediante algún lenguaje de programación, podrá haber notado que el resultado no es exactamente correcto
 \begin{sourcecode}{python}{Suma de dos decimales en Python}
@@ -45,5 +47,27 @@ Este ejemplo en particular funciona bien porque la mantisa del númer decimal re
 \end{align*}
 Obtenemos una serie infinita de potencias de dos. Como en la practica los computadores tienen memoria finita es necesario truncar la serie. En general, la mantisa recibe 52 bits, por lo que la serie se trunca hasta el termino $2^{-52}$. en efecto:
 \begin{align*}
-  [0.1]_{10} = 2^{-4}\cdot(1+ 2^{-1} + 2^{-4} + 2^{-5} + \cdots + 2^{-52})
+  [0.1]_{10} &= 2^{-4}\cdot(1+ 2^{-1} + 2^{-4} + 2^{-5} + \cdots + 2^{-52})
 \end{align*}
+
+Este número no será \textit{exactamente} igual a $0.1$, si no que será igual a $0.1 \cdot (1+ \epsilon)$. Este será el caso para la gran mayoría de los calculos hechos computacionalmente, el resultado final tendrá una pequeña divergencia con respecto al valor real, es decir 
+$$\bar{a} = a\cdot (1+ \epsilon) $$
+donde $\bar{a}$ y $a$ son los valores calculado y real, respectivamente. La diferencia entre el número deseado y el resultante se denomina \textbf{error computacional}. Dado que las computadores no pueden físicamente lidiar con cantidades infinitesimalmente pequeñas, muchos de los métodos de cálculo adaptados a la programación que veremos a lo largo del apunte serán basados en aproximaciones, por esta razón es importante aprender a identificar fuentes de errores numericos y sus ordenes de magnitud.
+
+\subsection{Derivadas numéricas}
+
+Sabemos del calculo diferencial que la derivada de una función arbitraria $f$ evaluada en un punto arbitrario $x_{0}$  es dada por
+\begin{equation}
+  f^{\prime}(x_{0}) = \lim_{h \to 0} \frac{f(x_{0}+h) - f(x_{0})}{h}
+\end{equation}
+pero ya sabemos que necesitamos que $h$ sea un número finito, por lo que estamos obligados a seguir anaizando esta definición. De la serie de taylor de $f$ evaluada en un punto $a + h$, $h > 0$, tenemos que:
+
+\begin{equation}
+  f(a + h) = f(a) + f^{\prime}(a)h + \frac{1}{2!}f^{\prime \prime}(\xi)h^{2}
+\end{equation}
+donde $a \leq \xi \leq a + h$, luego
+\begin{equation}
+  f^{\prime}(a) = \frac{f(a + h) - f(a)}{h} - \frac{1}{2!}f^{\prime \prime}(\xi)h^{2}
+\end{equation}
+
+Aquí, hemos obtenido una expresión finíta para la derivada de una función evaluada en un punto, denominada \textit{derivada adelantada}. 

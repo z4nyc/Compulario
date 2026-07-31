@@ -63,11 +63,24 @@ Sabemos del calculo diferencial que la derivada de una función arbitraria $f$ e
 pero ya sabemos que necesitamos que $h$ sea un número finito, por lo que estamos obligados a seguir anaizando esta definición. De la serie de taylor de $f$ evaluada en un punto $a + h$, $h > 0$, tenemos que:
 
 \begin{equation}
+  f(a + h) = f(a) + f^{\prime}(a)h + \frac{1}{2!}f^{\prime \prime}(a)h^{2} + \frac{1}{3!}f^{\prime \prime \prime}(a)h^{3} + \cdots
+\end{equation}
+Podemos reemplazar los terminos de orden superior por un $f(\xi)h^{2}$, $a \leq \xi \leq a + h$ (Teorema del valor medio), luego
+\begin{equation}
   f(a + h) = f(a) + f^{\prime}(a)h + \frac{1}{2!}f^{\prime \prime}(\xi)h^{2}
 \end{equation}
-donde $a \leq \xi \leq a + h$, luego
-\begin{equation}
-  f^{\prime}(a) = \frac{f(a + h) - f(a)}{h} - \frac{1}{2!}f^{\prime \prime}(\xi)h^{2}
+\begin{equation} \label{eq:derad}
+  f^{\prime}(a) = \frac{f(a + h) - f(a)}{h} - \frac{1}{2!}f^{\prime \prime}(\xi)h
 \end{equation}
 
-Aquí, hemos obtenido una expresión finíta para la derivada de una función evaluada en un punto, denominada \textit{derivada adelantada}. 
+Aquí, hemos obtenido una expresión finíta para la derivada de una función evaluada en un punto, denominada \textit{derivada adelantada}. Ahora, si buscamos el error de la ecuación \eqref{eq:derad} vemos que
+\begin{equation}
+  Error =  \left| f^{\prime}(a) - \frac{f(a+h) - f(a)}{h} \right| = \frac{1}{2!}\left| f^{\prime \prime}(\xi) \right| h
+\end{equation}
+en notación $\mathcal{O}$ de Landau, 
+\begin{equation}
+  Error = \frac{1}{2!}\left| f^{\prime \prime}(\xi) \right| h = \mathcal{O}(h)
+\end{equation}
+Esto quiere decir que el error de truncamiento de la derivada adelantada será del orden de $h$, como se puede observar en la figura \ref{fig:adnterr}, el error de la derivada decrece linealmente con el orden de magnitud de $h$ hasta aproximadamente $h \sim 10^{-8}$, pasado ese punto $h$ se vuelve demasiado pequeño para la computadora y predomina el error computacional. Por esta razón, a la hora de implementar este, o cualquiera de los métodos expuestos en este apunte, es conveniente utilizar un $h \sim 10^{-5}$. 
+
+\insertimage[\label{fig:adnterr}]{./img/derivadas/adnterr.pdf}{scale = 0.75}{Error de la derivada adelantada de $f(x) = \sin(x)$ en $x = 0.3$ para distintos valores de $h$}

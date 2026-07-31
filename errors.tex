@@ -84,3 +84,27 @@ en notación $\mathcal{O}$ de Landau,
 Esto quiere decir que el error de truncamiento de la derivada adelantada será del orden de $h$, como se puede observar en la figura \ref{fig:adnterr}, el error de la derivada decrece linealmente con el orden de magnitud de $h$ hasta aproximadamente $h \sim 10^{-8}$, pasado ese punto $h$ se vuelve demasiado pequeño para la computadora y predomina el error computacional. Por esta razón, a la hora de implementar este, o cualquiera de los métodos expuestos en este apunte, es conveniente utilizar un $h \sim 10^{-5}$. 
 
 \insertimage[\label{fig:adnterr}]{./img/derivadas/adnterr.pdf}{scale = 0.75}{Error de la derivada adelantada de $f(x) = \sin(x)$ en $x = 0.3$ para distintos valores de $h$}
+
+\subsubsection{Otros métodos de derivación numérica}
+
+Si bien la derivada adelantada es útil debido a lo simple de su implementación, muchas veces queremos utilizar métodos cuyo error sea de un mayor orden de $h$, es decir, menor.
+
+Similarmente a como obtuvimos la expresión \eqref{eq:derad}, podemos obtener una derivada \textbf{retrasada}, en efecto, consideramos la serie de taylor de $f(a-h)$,
+\begin{align}
+  f(a - h) &= f(a) - f^{\prime}(a)h + \frac{1}{2!}f^{\prime \prime}(\xi)h^{2} \\
+  f^{\prime}(a) &= \frac{f(a) - f(a-h)}{h} + \frac{1}{2!}f^{\prime \prime}(\xi)h \label{eq:deriret}
+\end{align}
+
+Si consideramos las series de taylor de $f(a+h)$ y $f(a-h)$ expandidas haste el tercer orden,
+\begin{align}
+  f(a+h) &= f(a) + f^{\prime}(a)h + \frac{1}{2!}f^{\prime \prime}(a)h^{2} + \frac{1}{3!}f^{\prime \prime \prime}(\xi)h^{3} \\
+  f(a-h) &= f(a) - f^{\prime}(a)h + \frac{1}{2!}f^{\prime \prime}(a)h^{2} - \frac{1}{3!}f^{\prime \prime \prime}(\xi)h^{3}
+\end{align}
+Ahora si restamos obtenemos,
+\begin{align}
+  f(a+h) - f(a-h) &= 2f^{\prime}(a)h + \frac{2}{3!}f^{\prime \prime \prime}(\xi)h^{3} \\
+  2f^{\prime}(a)h &= f(a+h) - f(a-h) - \frac{2}{3!}f^{\prime \prime \prime}(\xi)h^{3} \\
+  f^{\prime}(a) &= \frac{f(a+h) - f(a-h)}{2h} - \frac{1}{6}f^{\prime \prime \prime}(\xi)h^{3} \label{eq:dercen}
+\end{align}
+
+Así, obtenemos una expresión para la \textbf{derivada centrada}, con error del orden de $h^{3}$.

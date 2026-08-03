@@ -57,18 +57,18 @@ es decir, podemos reescribir el problema como:
     \vec{f}(\vec{x},t) = \begin{pmatrix} v(t) \\ -\omega^2 y(t) -g  \end{pmatrix}, \qquad 
       \frac{d\vec{x}}{dt} = \vec{f}(\vec{x},t).
 \end{equation}
-De esta forma, el algoritmo relevante del método es:
+De esta forma, el algoritmo relevante del método es\footnote{Este código es un esquema. Para ver código real, puede visitar \textbf{Link del repo cuando esté terminado}}:
 \begin{sourcecode}{python}{Algoritmo básico del método de Euler.}
   def f(x, omega=1.0, g = 9.8): # creamos el vector f, acá hay que definir omega
       y, v = x # desempaquetamos las variables
 
-      return array([u, -y * omega ** 2 - g]) 
+      return array([v, -y * omega ** 2 - g]) 
 
- x = zeros([Ntiempo, 2]) # Definimos un vector x con Ntiempo filas y 2 columnas
- x[0] = y0, v0 # Imponemos que la primera entrada de x sean las cond. iniciales
+  x = zeros([Ntiempo, 2]) # Definimos un vector x con los pares (x,v) a cada paso
+  x[0] = [y0, v0] # Imponemos que la primera entrada de x sean las cond. iniciales
 
 
- for n in range (Ntiempo-1):
+ for n in range (Ntiempo):
      x[n+1] = x[n] + h * f(x[n], omega, g) #partiendo de x[0], cambia los pares (0,0) por los valores del método
  #finalmente, solo hace falta desempaquetar el resultado del vector x.
 \end{sourcecode}
@@ -109,15 +109,15 @@ Es decir, el método de Euler no conserva la energía pues $E_{n+1} > E_n$ para 
 \end{figure}
 
 \subsubsection{Definición: Esquemas de 2 y 3 Pasos}
-Este método resulta sumamente útil al momento de lidiar con sistemas en los cuales hay \textbf{conservación de la energía mecánica} puesto que su formulación basada en pasos semi-enteros incorpora una estructura simpléctica\footnote{La demostración de  esto es muy compleja. Para más acerca de integradores simplécticos, puede leer este \href{https://pubs.aip.org/aapt/ajp/article-abstract/73/10/938/1042416/Symplectic-integrators-An-introduction?redirectedFrom=fulltext}{artículo}, que puede encontrar \href{https://mega.nz/folder/11A3gZ7T\#3c6jStOaqaUSs-BFee0SwQ/folder/8lB1nTqS}{aquí}.}. Este tipo de métodos suelen ser llamados \textbf{integradores simplécticos.} El método en cuestión consiste en usar un esquema de derivadas centradas que permiten que, para un paso $\Delta t$, se actualice la información de la rapidez dos veces por paso. Una primera formulación del método consiste en definir:
+Este método resulta sumamente útil al momento de lidiar con sistemas en los cuales hay \textbf{conservación de la energía mecánica} puesto que su formulación basada en pasos semi-enteros incorpora una estructura simpléctica\footnote{La demostración de  esto es muy compleja. Para más acerca de integradores simplécticos, puede leer este \href{https://pubs.aip.org/aapt/ajp/article-abstract/73/10/938/1042416/Symplectic-integrators-An-introduction?redirectedFrom=fulltext}{artículo}, que puede encontrar \href{https://mega.nz/folder/11A3gZ7T\#3c6jStOaqaUSs-BFee0SwQ/folder/8lB1nTqS}{aquí}.} (conserva la energía). Este tipo de métodos suelen ser llamados \textbf{integradores simplécticos.} El método en cuestión consiste en usar un esquema de derivadas centradas que permiten que, para un paso $\Delta t$, se actualice la información de la rapidez dos veces por paso. Una primera formulación del método consiste en definir:
 
   \begin{align}
     v(t+h/2) &= \frac{x(t+h) - x(t)}{h} + \mathcal{O}(h^2),\\
     a(t) &= \frac{v(t +h/2) - v(t-h/2)}{h} + \mathcal{O}(h^2),
   \end{align}
-  lo que define un integrador de segundo orden con 2 pasos. Multiplicando ambos lados por $h$ y expandiendo en Taylor alrededor de $0$, tenemos :
+  lo que define un integrador de segundo orden con 2 pasos. Multiplicando ambos lados por $h$ y expandiendo en Taylor alrededor de $t$, tenemos :
   \begin{align}
-    v(t+h/2) &= v(t-h/2) + ha(t) + \mathcal{O}{h^3},\\
+    v(t+h/2) &= v(t-h/2) + ha(t) + \mathcal{O}(h^3),\\
     x(t+h) &= x(t) + hv(t+h/2) + \mathcal{O}(h^3).
   \end{align}
   Note que el método requiere una condición inicial $v(t_0) = v_0$ a partir del cual computamos los $v_{n+1/2}$ (esto siempre ocurrirá en esquemas basados en derivadas centradas) además de tener información acerca de la aceleración de antemano. Por esto, el esquema suele iniciarse con el método de Euler\footnote{Esto no significa que todo el método sea tipo Euler.}:
@@ -142,24 +142,23 @@ Este método resulta sumamente útil al momento de lidiar con sistemas en los cu
     Notemos que bajo este esquema, no tenemos información acerca de la velocidad en tiempos enteros, por lo que generalmente se suele considerar la media aritmética entre 2 velocidades adyacentes (esto se ha implementado en la última línea). \\
 
     También es útil implementar este método como un esquema de 3 pasos, calculando velocidades tanto a tiempos enteros como semi-enteros. La utilidad de esta formulación es que dejamos de depender del método de Euler para inicializar $v_{1/2}$. A continuación, se muestra el razonamiento para componer el esquema.
-    Consideremos la derivada centrada en $t_0 = h/2$:
+    Consideremos la derivada centrada en $t+h/2$:
 
     \begin{align}
       v(t+h/2) &= \frac{x(t+h) - x(t)}{2\cdot h/2} + \mathcal{O}(h^2), \\
       \Rightarrow x(t+h) &= x(t) + hv(t+h/2) + \mathcal{O}(h^3). \label{eq: pos_frog}
     \end{align}
-
-    Ahora, para la velocidad, consideremos la derivada centrada en $ h$:
+    Ahora, para la velocidad, consideremos la derivada centrada en $t$ de $v$ :
     \begin{align}
       a(t) = v'(t) &= \frac{v(t+h/2) - v(t-h/2)}{h} + \mathcal{O}(h^2) \\
       \Rightarrow v(t+h/2) &= v(t-h/2) + ha(t) + \mathcal{O}(h^3).
     \end{align}
-    Expandiendo $v(t-h/2)$ alrededor de $0$, tenemos:
+    Expandiendo $v(t-h/2)$ alrededor de $t$, tenemos:
     \begin{align}
       v(t+h/2) &= v(t) -\frac{h}{2}v'(t) + ha(t) + \mathcal{O}(h^3), \\
       \Rightarrow v(t+h/2) &= v(t) + \frac{h}{2}a(t) + \mathcal{O}(h^3). \label{eq:v_half-frog}
     \end{align}
-    Finalmente, para obtener el término $v(t+h)$ (el paso entero), se considera una expansión a primer orden centrada en $h/2$:
+    Finalmente, para obtener el término $v(t+h)$ (el paso entero), se considera una expansión a primer orden centrada en $t +h/2$:
     \begin{equation}
       v(t+h) = v(t+h/2) + \frac{h}{2}a(t+h/2). \label{eq: integer-frog}
     \end{equation}
@@ -170,7 +169,7 @@ Este método resulta sumamente útil al momento de lidiar con sistemas en los cu
       x[0], v[0] = x0, v0
 
       # Metodo de salto de rana
-      for n in range(N):
+      for n in range(N-1):
           vmedio = v[n] + (h/2) * a[n] # v[n] representa v_n
           x[n+1] = x[n] + h * vmedio  # vmedio representa v_n+1/2
           v[n+1] = vmedio + (h/2) * a[n+1] # v[n+1] representa v_n+1

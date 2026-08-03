@@ -39,7 +39,7 @@
 Esto define un método de primer orden. En general, el orden  $n$ de un integrador o método se suele expresar como el $n$ tal que los pasos tienen error de orden $\mathcal{O}(h^{n+1})$. Geométricamente, lo que sucede paso a paso es que partimos situados en un punto $\vec{x}_0$ dado por una condición inicial en un tiempo $t_0$, y avanzamos al siguiente punto siguiendo el vector tangente $f(\vec{x}_0,t)$. Abordaremos el algoritmo con un problema.
 
 \subsubsubsectionanum{Ejemplo}
-Consideremos un objeto de masa $m$ colgado de un resorte de constante elástica $k$, en un campo gravitatorio de magnitud $g$. Si el origen del sistema de referencia se encuentra donde el objeto está en reposo, entonces la altura $y(t)$ se rige por la ecuación diferencial:
+Consideremos un objeto de masa $m$ colgado de un resorte de constante elástica $k$, en un campo gravitatorio de magnitud $g$. Si el origen del sistema de referencia se encuentra ubicado en el resorte en su longitud natural, entonces la altura $y(t)$ se rige por la ecuación diferencial:
 \begin{equation}
  y''(t) + \omega^2 y(t) = -g,
 \end{equation}
@@ -72,8 +72,11 @@ De esta forma, el algoritmo relevante del método es\footnote{Este código es un
      x[n+1] = x[n] + h * f(x[n], omega, g) #partiendo de x[0], cambia los pares (0,0) por los valores del método
  #finalmente, solo hace falta desempaquetar el resultado del vector x.
 \end{sourcecode}
-
-
+ Finalmente, para ver la eficacia del método, se ha simulado tanto la solución analítica como la solución mediante el método de Euler en la figura \ref{fig:euler}. Podemos apreciar 
+\begin{figure}
+  \includegraphics[scale=0.5]{src/ode/Euler.pdf}
+  \caption{Soluciones al problema del resorte colgando. Note como $y_{eq} = -9.8 (g/\omega^2)$ pues en ese punto $y'' = 0$ y $y'$ es máxima. } \label{fig:euler}
+\end{figure}
 
  \subsection{Método del salto de la rana}
   \subsubsection{Motivación}
@@ -115,7 +118,7 @@ Este método resulta sumamente útil al momento de lidiar con sistemas en los cu
     v(t+h/2) &= \frac{x(t+h) - x(t)}{h} + \mathcal{O}(h^2),\\
     a(t) &= \frac{v(t +h/2) - v(t-h/2)}{h} + \mathcal{O}(h^2),
   \end{align}
-  lo que define un integrador de segundo orden con 2 pasos. Multiplicando ambos lados por $h$ y expandiendo en Taylor alrededor de $t$, tenemos :
+  lo que define un integrador de segundo orden con 2 pasos. Multiplicando ambos lados por $h$, tenemos :
   \begin{align}
     v(t+h/2) &= v(t-h/2) + ha(t) + \mathcal{O}(h^3),\\
     x(t+h) &= x(t) + hv(t+h/2) + \mathcal{O}(h^3).

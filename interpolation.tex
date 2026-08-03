@@ -1,0 +1,12 @@
+\section{Interpolación y ajustes}
+
+Como mencionamos muy anteriormente, muchas veces no tendremos el lujo de lidiar con funciones definidas analíticamente en todos sus puntos, en lugar de eso, tendremos algun conjunto discreto de puntos $(x_{i}, f_{i})_{i = 0, \cdots, N}$. En estos casos podríamos querer hacer una de dos cosas: interpolar, o bien, ajustar.
+
+\subsection{Interpolación de Lagrange}
+La interpolación consiste en encontrar una función que pase por todos y cada uno de los puntos dados. En estricto rigor estamos llenando el espacio entre medio de los puntos. Si le suena familiar, es porque esto es lo que hacen los modelos de lenguaje (Gemini, ChatGPT, Claude, etc); la diferencia es que estos lo hacen con sets de datos enormes. Ahora, dados un conjunto arbitrario de puntos $(x_{i}, f_{i})_{i=0,\cdots ,N}$ siempre podemos encontrar un polinomio de grado menor o igual a $N$ que interpole los puntos, es decir
+\begin{equation}
+  f_{i} = p(x_{i})
+\end{equation}
+
+
+

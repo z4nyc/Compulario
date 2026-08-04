@@ -4,9 +4,69 @@ Como mencionamos muy anteriormente, muchas veces no tendremos el lujo de lidiar 
 
 \subsection{Interpolación de Lagrange}
 La interpolación consiste en encontrar una función que pase por todos y cada uno de los puntos dados. En estricto rigor estamos llenando el espacio entre medio de los puntos. Si le suena familiar, es porque esto es lo que hacen los modelos de lenguaje (Gemini, ChatGPT, Claude, etc); la diferencia es que estos lo hacen con sets de datos enormes. Ahora, dados un conjunto arbitrario de puntos $(x_{i}, f_{i})_{i=0,\cdots ,N}$ siempre podemos encontrar un polinomio de grado menor o igual a $N$ que interpole los puntos, es decir
-\begin{equation}
+\begin{equation} \label{eq:kronecond}
   f_{i} = p(x_{i})
 \end{equation}
+Podemos proponer una combinación lineal de polinomios de la forma
+\begin{equation} \label{eq:interpol}
+  L(x) = \sum_{j = 0}^{N}f_{j}\ell_{j}(x)
+ \end{equation}
+ imponiendo la condición
+ \begin{equation}
+   \ell_{j}(x_{i}) =
+   \begin{cases}
+     1, & i = j \\
+     0, & i \neq j
+   \end{cases}
+  \end{equation}
+con tal que se cumpla \eqref{eq:kronecond}. Podemos encontrar que los polinomios $\ell_{j}(x)$, denominados \textbf{polinmios base de Lagrange}, son dados por:
 
+\begin{align}
+  \ell_{j}(x) &= \left( \frac{x-x_{0}}{x_{j} - x_{0}} \right) \left( \frac{x-x_{1}}{x_{j} - x_{1}} \right) \cdots \left( \frac{x-x_{j-1}}{x_{j} - x_{j-1}} \right) \left( \frac{x-x_{j+1}}{x_{j} - x_{j+1}} \right) \cdots \left( \frac{x-x_{N}}{x_{j} - x_{N}} \right) \\
+              &= \prod_{i = 0, i \neq j}^{N}\left( \frac{x - x_{i}}{x_{j} - x_{i}} \right)
+ \end{align}
 
+y forman \eqref{eq:interpol}, denominado \textbf{polinomio interpolador de Lagrange}.
 
+\insertimage[\label{fig:lagrangeint}]{./img/interpol/lagrange.pdf}{width=12cm}{Conjunto de puntos interpolados por Lagrange y función original.}
+
+\subsection{Matriz de Vandermonde}
+
+En la sección anterior, logramos interpolar un conjunto de puntos utilizando una combinación lineal de polinomios (vea \eqref{eq:interpol}), por lo que es natural preguntarse si existe algun otro tipo de función interpoladora. La respuesta es que podemos interpolar con cualquier tipo de función que forme una \textbf{base del espacio de funciones}. Consideremos que queremos interpolar una un conjunto de puntos $(x_{j}, f_{j})$ por medio de una función $p(x)$ tal que
+\begin{equation*}
+  f_{j} = p(x_{j})
+\end{equation*}
+
+tenemos que
+\begin{align}
+  p(x) &= \sum_{i = 0}^{N}p_{i}\varphi_{i}(x) \\
+       &= p_{0} \varphi_{0}(x) + p_{1} \varphi_{1}(x) + \cdots + p_{N} \varphi_{N}(x)
+\end{align}
+
+Así, tenemos el sistema de ecuaciones
+\begin{equation}
+  f_{j} = p_{0} \varphi_{0}(x_{j}) + p_{1} \varphi_{1}(x_{j}) + \cdots + p_{N} \varphi_{N}(x_{j})
+ \end{equation}
+donde queremos encontrar los $p_{j}$. Matricialmente tenemos que
+\begin{equation}
+\begin{bmatrix}
+  \varphi_{0}(x_{0}) & \varphi_{1}(x_{0}) & \cdots & \varphi_{N}(x_{0}) \\
+  \varphi_{0}(x_{1}) & \varphi_{1}(x_{1}) & \cdots & \varphi_{N}(x_{1}) \\ 
+  \vdots & \vdots & \ddots & \vdots \\
+  \varphi_{0}(x_{N}) & \varphi_{1}(x_{N}) & \cdots & \varphi_{N}(x_{N}) \\
+\end{bmatrix}
+\begin{bmatrix}
+  p_{0} \\ p_{1} \\ \vdots \\ p_{N}
+\end{bmatrix}
+  =
+\begin{bmatrix}
+  f_{0} \\ f_{1} \\ \vdots \\ f_{N}
+\end{bmatrix}
+\end{equation}
+
+De esta manera, reducimos el problema a resolver el sistema encontrando la inversa de la matriz $\varphi_{i}(x_{j})$. Finalmente, todo este proceso es una generalización de encontrar los coeficientes de una serie que aproxime una función, y es analogo a encontrar los coeficientes de una serie de Taylor. El tipo de serie por el cual estemos interpolando depende de como elijamos la función $\varphi_{n}(x)$, por ejemplo
+\begin{itemize}
+  \item Serie de Fourier: $\varphi_{n}(x) = \exp^{in \pi x /L}$
+  \item Serie de polinomios de Lagrange: $\varphi_{n}(x) = \ell_{n}(x)$
+  \item Serie de Legendre: $\varphi_{n}(x) = P_{n}(x)$ (Polinomios de Legendre) 
+\end{itemize}

@@ -12,7 +12,7 @@ Podemos proponer una combinación lineal de polinomios de la forma
   L(x) = \sum_{j = 0}^{N}f_{j}\ell_{j}(x)
  \end{equation}
  imponiendo la condición
- \begin{equation}
+ \begin{equation} \label{eq:kronecker}
    \ell_{j}(x_{i}) =
    \begin{cases}
      1, & i = j \\
@@ -48,7 +48,7 @@ Así, tenemos el sistema de ecuaciones
   f_{j} = p_{0} \varphi_{0}(x_{j}) + p_{1} \varphi_{1}(x_{j}) + \cdots + p_{N} \varphi_{N}(x_{j})
  \end{equation}
 donde queremos encontrar los $p_{j}$. Matricialmente tenemos que
-\begin{equation}
+\begin{equation} \label{eq:vandercasi}
 \begin{bmatrix}
   \varphi_{0}(x_{0}) & \varphi_{1}(x_{0}) & \cdots & \varphi_{N}(x_{0}) \\
   \varphi_{0}(x_{1}) & \varphi_{1}(x_{1}) & \cdots & \varphi_{N}(x_{1}) \\ 
@@ -70,3 +70,17 @@ De esta manera, reducimos el problema a resolver el sistema encontrando la inver
   \item Serie de polinomios de Lagrange: $\varphi_{n}(x) = \ell_{n}(x)$
   \item Serie de Legendre: $\varphi_{n}(x) = P_{n}(x)$ (Polinomios de Legendre) 
 \end{itemize}
+
+\subsubsection{Casos particulares interesantes}
+Si elejimos los polinomios de grado $n$ como nuestra base de funciones, es decir, $\varphi_{n}(x) = x^{n}$, la matriz del lado izquierdo de \eqref{eq:vandercasi} se convierte en la matriz \eqref{eq:vandermonde}
+\begin{equation} \label{eq:vandermonde}
+  \begin{bmatrix}
+    1 & x_{0} & x_{0}^{2} & \cdots & x_{0}^{N} \\
+    1 & x_{1} & x_{1}^{2} & \cdots & x_{1}^{N} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    1 & x_{N} & x_{N}^{2} & \cdots & x_{N}^{N} 
+  \end{bmatrix}
+\end{equation}
+denominada \textbf{Matriz de Vandermonde}.
+
+Alternativamente, si hacemos que $\varphi_{n}(x) = \ell_{n}(x)$, por la propiedad \eqref{eq:kronecker}, la matriz izquierda de \eqref{eq:vandercasi} se convierte en la matriz identidad de $N\times N$, lo que reafirma la condición \eqref{eq:kronecond}.

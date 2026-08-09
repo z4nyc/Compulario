@@ -72,7 +72,7 @@ De esta forma, el algoritmo relevante del método es\footnote{Este código es un
      x[n+1] = x[n] + h * f(x[n], omega, g) #partiendo de x[0], cambia los pares (0,0) por los valores del método
  #finalmente, solo hace falta desempaquetar el resultado del vector x.
 \end{sourcecode}
- Finalmente, para ver la eficacia del método, se ha simulado tanto la solución analítica como la solución mediante el método de Euler en la figura \ref{fig:euler}. Podemos apreciar 
+ Finalmente, para ver la eficacia del método, se ha simulado tanto la solución analítica como la solución mediante el método de Euler en la figura \ref{fig:euler}. Podemos apreciar como \textbf{rápidamente} la solución numérica difiere de la solución analítica. En particular, vemos como la amplitud de la oscilación va aumentando conforme avanza el tiempo, ¿tiene esto significado físico? La respuesta se aborda en la siguiente sección.
 \begin{figure}
   \includegraphics[scale=0.5]{src/ode/Euler.pdf}
   \caption{Soluciones al problema del resorte colgando. Note como $y_{eq} = -9.8 (g/\omega^2)$ pues en ese punto $y'' = 0$ y $y'$ es máxima. } \label{fig:euler}

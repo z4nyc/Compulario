@@ -200,6 +200,61 @@ Este método resulta sumamente útil al momento de lidiar con sistemas en los cu
 
 \subsection{Métodos Runge-Kutta}
     
+Los métodos de Runge-Kutta son una familia de métodos numericos para resolver ecuaciones diferenciales ordinarias. Estos son probablemente los más usados en la física dado su versatilidad y su relativa simpleza, podrá notar que este método es bastante parecido al método de Euler discutido al inicio de este capitulo. Similarmente a los esquemas anteriores, iniciamos con un problema del tipo
+\begin{equation}
+  \fracderivat{x}{t}{} = f(t, x)
+ \end{equation}
 
+Podemos aproximar una solución considerando expansiones de $x(t)$ y $x(t+ h)$, con $h > 0$, centradas en $t + \frac{h}{2}$, en efecto:
+\begin{align*}
+  x(t + h) &= x(t + \frac{h}{2}) + x^{\prime}(t + \frac{h}{2}) \left(\frac{h}{2} \right) + \frac{1}{2}x^{\prime \prime}(t + \frac{h}{2})\left( \frac{h}{2} \right)^{2} + \mathcal{O}(h^{3}) \\
+  x(t) &= x(t + \frac{h}{2}) - x^{\prime}(t + \frac{h}{2}) \left(\frac{h}{2} \right) + \frac{1}{2}x^{\prime \prime}(t + \frac{h}{2})\left( \frac{h}{2} \right)^{2} - \mathcal{O}(h^{3})
+\end{align*}
+
+Restando ambas expresiones obtendremos
+\begin{equation} \label{eq:second}
+  x(t + h) = x(t) + x^{\prime}(t + \frac{h}{2}) h + \mathcal{O}(h^{3})
+ \end{equation}
+Pero, del enunciado del problema, $x^{\prime}(t + \frac{h}{2}) = f(t + \frac{h}{2}, x(t + \frac{h}{2}))$. De momento parece que no hemos hecho nada, pues solo hemos cambiado el problema de no conocer $x(t)$ a no conocer $x(t + \frac{h}{2})$, pero si recordamos el método de Euler,
+\begin{equation} \label{eq:first}
+  x(t + \frac{h}{2}) = x(t) + f(t, x(t))\frac{h}{2}
+ \end{equation}
+
+Las expresiones \eqref{eq:first} y \eqref{eq:second} consituyen el método de Runge-Kutta de orden 2, o simplemente, RK2. En la literatura se suele representar de la forma
+\begin{align}
+  K_{1} &= f(t, x(t)) \\
+  K_{2} &= f(t + \frac{h}{2}, x(t) + \frac{h}{2}K_{1}) \\
+  x(t + h) &= x(t) + hK_{2}
+\end{align}
+
+Esta \textbf{no} es la única forma de construir un RK2, de hecho, existen infinitas formas de hacerlo.
+
+Los métodos de Runge-Kutta pueden, de cierto modo, verse como una generalización del método de Euler, de manera que este podría interpretarse como un Runge-Kutta de orden 1. 
+
+\subsubsection{Métodos de orden superior}
+  El proceso matemático para obtener la formulación de un RK de orden superior es tedioso, fome y se escapa del alcance del curso, pero de todas formas revisaremos algunos métodos de orden superior, ya que estos son bastante comunes a la hora de resolver EDOs numericamente.
+
+\begin{align}
+  K_{1} &= hf(t, x(t)) \label{eq:RK4beg} \\
+  K_{2} &= f(t + \frac{h}{2}, x(t) + \frac{h}{2}K_{1}) \\
+  K_{3} &= f(t + \frac{h}{2}, x(t) + \frac{h}{2}K_{2}) \\
+  K_{4} &= f(t+ h, x(t) +hK_{3}) \\
+  x(t + h) &= x(t) +\frac{h}{6}(K_{1} + 2K_{2} + 2K_{3} + K_{4}) \label{eq:RK4end}
+\end{align}
+
+Las expresiones \eqref{eq:RK4beg}-\eqref{eq:RK4end} representan el Método de Runge-Kutta de orden 4, o RK4, este esquema es por lejos el más utilizado en la física. Tiene error de orden $\mathcal{O}(h^{4})$, y es el último RK cuya cantidad de "pasos" es igual al orden de su error (el RK5 requiere 6 pasos), por esta razón, este método es un balance entre precisión numérica y costo de computación.
+
+\begin{align}
+  K_{1} &= hf(t, x) \label{eq:shuobeg} \\
+  K_{2} &= hf(t + h, x(t) + K_{1}) \\
+  K_{3} &= hf(t + \frac{1}{2}h, x(t) + \frac{1}{4}(K_{1} + K_{2})) \\
+  x(t+h) &= x(t) + \frac{1}{6}K_{1} + \frac{1}{6}K_{2} + \frac{2}{3}K_{3} \label{eq:shuoend}
+\end{align}
+
+Las expresiones \eqref{eq:shuobeg}-\eqref{eq:shuoend} forman una formulación particular de un RK3 denominado \textbf{Método de Shu-Osher}. Este esquema mantiene la estabilidad de la solución mejor que el esquema estandar de RK3, por esta razón, se vuelve particularmente útil para resolver problemas con roce, o algún elemento disipativo.
+
+Como hemos visto, los métodos de Runge-Kutta son sumamente útiles debido a su bajo error y relativa simpleza a la hora de implementar computacionalmente, lamentablemente, a diferencia de los esquemas salto de rana, estos no conservan la energía. Esto quiere decir que si usted resuelve un sistema \textbf{sin} disipación (e.g. Movimiento planetario, resorte sin amortiguamiento) utilizando métodos RK, la solución que obtendrá va a presentar disipación o introducción de energía no deaseada a pesar de que esto difiera de la solución analítica y de la realidad física (en los ejemplos anteriores, el planeta caerá al centro de masa, y/o el resorte incrementará su amplitud hacia el infinito, como muestra la figura \ref{fig:phasespring}). Por otro lado, una pequeña ventaja de los RK, es que si la solución de la ecuación a resolver es un polinomio de grado $N$, entonces el esquema RK$N$ obtendrá la solución exacta. 
+
+\insertimage[\label{fig:phasespring}]{./img/ejemplos/phase_spring.pdf}{scale=0.75}{Espacio de fases del oscilador armónico resuelto con RK4.}
 
 

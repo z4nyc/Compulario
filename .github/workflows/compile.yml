@@ -6,7 +6,7 @@ name: Build Portfolio PDF
 on:
   push:
     branches:
-      - master
+      - main
 
 # ask permission to write a new branch
 permissions:

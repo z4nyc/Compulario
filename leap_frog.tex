@@ -200,7 +200,7 @@ Este método resulta sumamente útil al momento de lidiar con sistemas en los cu
 
 \subsection{Métodos Runge-Kutta}
     
-Los métodos de Runge-Kutta son una familia de métodos numericos para resolver ecuaciones diferenciales ordinarias. Estos son probablemente los más usados en la física dado su versatilidad y su relativa simpleza, podrá notar que este método es bastante parecido al método de Euler discutido al inicio de este capitulo. Similarmente a los esquemas anteriores, iniciamos con un problema del tipo
+Los métodos de Runge-Kutta son una familia de métodos numericos iterativos para resolver ecuaciones diferenciales ordinarias, utilizando el valor de la solución en $t_{0}$ para calcular la solución en $t_{1} = t_{0} + h$, y reptiendo este proceso hasta el tiempo final $t_{n} = t_{n-1} + h$, obteniendo así los valores aproximados de la solución en un intervalo de tiempo discreto y finito. Estos son probablemente los más usados en la física dado su versatilidad y su relativa simpleza, podrá notar que este método es bastante parecido al método de Euler discutido al inicio de este capitulo. Similarmente a los esquemas anteriores, iniciamos con un problema del tipo
 \begin{equation}
   \fracderivat{x}{t}{} = f(t, x)
  \end{equation}
@@ -258,8 +258,61 @@ Como hemos visto, los métodos de Runge-Kutta son sumamente útiles debido a su 
 \insertimage[\label{fig:phasespring}]{./img/ejemplos/phase_spring.pdf}{scale=0.75}{Espacio de fases del oscilador armónico resuelto con RK4.}
 
 \subsubsection{Formulación semi-general}
+En general, un método RK de $s$ etapas se puede escribir como
+\begin{equation}
+  K_{i} = hf\left( t_{n} + c_{i}h, y_{n} + \sum_{j = 1}^{i-1}a_{ij}K_{j} \right), \quad y_{n+1} = y_{n} + \sum_{i=1}^{s}b_{i}K_{i}
+ \end{equation}
 
+donde los coeficientes $a_{ij}$, $b_{i}$ y $c_{i}$ se obtienen mediante un arreglo de valores de la forma \eqref{eq:butch}, denominado \textbf{tabla de Butcher}
+\begin{equation} \label{eq:butch}
+  \begin{array}{c|c c c c}
+    c_{1} & 0 &  &  &  \\
+    c_{2} & a_{21} & 0 & & \\
+    \vdots & \vdots & \ddots & \ddots & \\
+    c_{s} & a_{s1} & \cdots & a_{s,s-1} & 0 \\
+    \hline
+    & b_{1} & b_{2} & \cdots & b_{s}
+  \end{array} 
+ \end{equation}
+Donde la matriz $[a_{ij}]$ se denomina \textbf{matriz de Runge-Kutta}, y los $b_{i}$ y $c_{i}$ se denominan \textbf{pesos} y \textbf{nodos}, respectivamente. Por ejemplo, la tabla de Butcher para RK4 es dada por \eqref{eq:RK4butch}
+
+\begin{equation} \label{eq:RK4butch}
+  \begin{array}{c|c c c c}
+    0 &  &  &  &  \\
+    1/2 & 1/2 & & & \\
+    1/2 & 0 & 1/2 & &  \\
+    1 & 0 & 0 & 1 &  \\
+    \hline
+    & 1/6 & 1/3 & 1/3 & 1/6
+  \end{array} 
+ \end{equation}
+
+El metodo de Shu-Osher es representado por la tabla \eqref{eq:shubutch}
+
+\begin{equation} \label{eq:shubutch}
+  \begin{array}{c|c c c }
+    0 &  &  &  \\
+    1 & 1 & & \\
+    1/2 & 1/4 & 1/4 & \\
+    \hline
+    & 1/6 & 1/3 & 2/3 
+  \end{array} 
+ \end{equation}
+
+ Finalmente, la tabla \eqref{eq:eulerbutch} representa el método de Euler 
+\begin{equation} \label{eq:eulerbutch}
+  \begin{array}{c|c }
+    0 &  \\
+    \hline
+    & 1
+  \end{array} 
+ \end{equation}
 
 \subsubsection{Implementación en Python}
 
-\subsubsection{Teorema $\Pi$ de Newton}
+
+
+\subsubsection{Teorema $\Pi$ de Buckingham}
+
+Para finalizar esta sección, sería bueno mencionar un teorema importante del análisis dimensional, el \textbf{Teorema $\Pi$ de Buckingham}, el cual establece que dado un sistema físico que involucre $n$ magnitudes físicas, representadas por $k$ magnitudes fundamentales, entonces, podemos escribir el sistema por medio de $n-k$ variables adimensionales a partir de las variables originales. 
+A grandes rasgos, este nos dice que los problemas físicos no dependen del sistema de unidades en el que se representen

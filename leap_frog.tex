@@ -315,4 +315,47 @@ El metodo de Shu-Osher es representado por la tabla \eqref{eq:shubutch}
 \subsubsection{Teorema $\Pi$ de Buckingham}
 
 Para finalizar esta sección, sería bueno mencionar un teorema importante del análisis dimensional, el \textbf{Teorema $\Pi$ de Buckingham}, el cual establece que dado un sistema físico que involucre $n$ magnitudes físicas, representadas por $k$ magnitudes fundamentales, entonces, podemos escribir el sistema por medio de $n-k$ variables adimensionales a partir de las variables originales. 
-A grandes rasgos, este nos dice que los problemas físicos no dependen del sistema de unidades en el que se representen
+A grandes rasgos, este nos dice que los problemas físicos no dependen del sistema de unidades en el que se representen, y además, en algunos casos, nos permite "eliminar" constantes o parametros del problema, y así determinar si estos son relevantes a la dinámica del problema, o no.
+
+Por ejemplo, consideremos el movimiento vertical de un proyectil considerando la resistencia del aire
+\begin{equation} \label{eq:dimsi}
+  v_{y}^{\prime} = -g - \mu v_{y}^{2}, \quad y(0) = y_{0}, \quad v_{y}(0) = v_{y0}
+ \end{equation}
+
+ Para comenzar a adimensionalizar, analizamos las unidades de las variables del problema en la tabla \ref{tab:units}
+
+\begin{table}
+  \centering
+  \caption{Variables y sus dimensiones}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|}
+    \hline
+    Variable & $t$ & $v_{y}$ & $v_{y0}$ & $g$ & $\mu$ & $y$ & $y_{0}$ \\
+    \hline
+    Dimensión & $T$ & $LT^{-1}$ & $LT^{-1}$ & $LT^{-2}$ & $L^{-1}$ & $L$ & $L$ \\
+    \hline
+  \end{tabular}
+  \label{tab:units}
+\end{table}
+
+Vemos entonces que tenemos 7 variables en total, expresadas en terminos de 2 unidades fundamentales, longitud ($L$) y tiempo ($T$), por lo que, adimensionalizando el sistema, podremos reducir el problema a $7-2 = 5$ variables. Ahora, como debemos eliminar \textbf{dos} variables, elegimos \textbf{dos} constantes con las cuales podamos normalizar (adimensionalizar) el sistema, para ello, notamos que podemos obtener todas las unidades involucradas en el problema multiplicando y dividiendo las constantes $v_{y0}$ y $g$. Así, definimos nuestro nuevo conjunto de variables adimensionales, denominado $\Pi$-grupo\footnote{El cual no es un grupo en el sentido matemático :c}, dado por \eqref{eq:pigroup}
+\begin{equation} \label{eq:pigroup}
+  \begin{aligned}
+    \Pi_{1} = t\cdot \left( \frac{g}{v_{y0}} \right) = \tau, \quad 
+    \Pi_{2} = v_{y}\cdot \left( \frac{1}{v_{y0}} \right) = \nu_{y},& \quad 
+    \Pi_{3} = v_{y0} \cdot \left( \frac{1}{v_{y0}} \right) = 1, \quad
+    \Pi_{4} = g \cdot \left( \frac{1}{g} \right) = 1, \quad \\
+    \Pi_{5} = \mu \cdot \left( \frac{v_{y0}^{2}}{g} \right) = \tilde{\mu}, \quad
+    \Pi_{6} = y\cdot & \left( \frac{g}{v_{y0}^{2}} \right) = \rho, \quad
+    \Pi_{7} = y_{0} \cdot \left( \frac{g}{v_{y0}^{2}} \right) = \rho_{0}
+  \end{aligned}
+\end{equation}
+
+De esta manera, podemos reescribir el probelma original en terminos de nuestras nuevas variables, de modo que
+
+\begin{equation}
+  \fracderivat{\nu_{y}}{\tau}{} = -1 -\tilde{\mu} \nu_{y}^{2}, \quad \rho(0) = \rho_{0}, \nu_{y}(0) = 1
+ \end{equation}
+ 
+ De esta manera, podemos deducir que variables son dinámicamente relevantes, con lo cual podemos analizar el problema de manera más eficiente.
+
+ Este proceso es útil, pero realmente se utiliza en dinámica de fluidos. De todas maneras, si quieren analizar un problema físico muy complejo numéricamente, es conveniente que normalizar las variables antes de programarlo, ya que, al reducir el número de variables, podemos, potencialmente, ignorar constantes muy pequeñas comparadas al resto de las variables que aumenten el error numérico (e.g. constante gravitacional para movimiento planetario)

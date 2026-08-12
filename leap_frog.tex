@@ -200,6 +200,162 @@ Este método resulta sumamente útil al momento de lidiar con sistemas en los cu
 
 \subsection{Métodos Runge-Kutta}
     
+Los métodos de Runge-Kutta son una familia de métodos numericos iterativos para resolver ecuaciones diferenciales ordinarias, utilizando el valor de la solución en $t_{0}$ para calcular la solución en $t_{1} = t_{0} + h$, y reptiendo este proceso hasta el tiempo final $t_{n} = t_{n-1} + h$, obteniendo así los valores aproximados de la solución en un intervalo de tiempo discreto y finito. Estos son probablemente los más usados en la física dado su versatilidad y su relativa simpleza, podrá notar que este método es bastante parecido al método de Euler discutido al inicio de este capitulo. Similarmente a los esquemas anteriores, iniciamos con un problema del tipo
+\begin{equation}
+  \fracderivat{x}{t}{} = f(t, x)
+ \end{equation}
+
+Podemos aproximar una solución considerando expansiones de $x(t)$ y $x(t+ h)$, con $h > 0$, centradas en $t + \frac{h}{2}$, en efecto:
+\begin{align*}
+  x(t + h) &= x(t + \frac{h}{2}) + x^{\prime}(t + \frac{h}{2}) \left(\frac{h}{2} \right) + \frac{1}{2}x^{\prime \prime}(t + \frac{h}{2})\left( \frac{h}{2} \right)^{2} + \mathcal{O}(h^{3}) \\
+  x(t) &= x(t + \frac{h}{2}) - x^{\prime}(t + \frac{h}{2}) \left(\frac{h}{2} \right) + \frac{1}{2}x^{\prime \prime}(t + \frac{h}{2})\left( \frac{h}{2} \right)^{2} - \mathcal{O}(h^{3})
+\end{align*}
+
+Restando ambas expresiones obtendremos
+\begin{equation} \label{eq:second}
+  x(t + h) = x(t) + x^{\prime}(t + \frac{h}{2}) h + \mathcal{O}(h^{3})
+ \end{equation}
+Pero, del enunciado del problema, $x^{\prime}(t + \frac{h}{2}) = f(t + \frac{h}{2}, x(t + \frac{h}{2}))$. De momento parece que no hemos hecho nada, pues solo hemos cambiado el problema de no conocer $x(t)$ a no conocer $x(t + \frac{h}{2})$, pero si recordamos el método de Euler,
+\begin{equation} \label{eq:first}
+  x(t + \frac{h}{2}) = x(t) + f(t, x(t))\frac{h}{2}
+ \end{equation}
+
+Las expresiones \eqref{eq:first} y \eqref{eq:second} consituyen el método de Runge-Kutta de orden 2, o simplemente, RK2. En la literatura se suele representar de la forma
+\begin{align}
+  K_{1} &= f(t, x(t)) \\
+  K_{2} &= f(t + \frac{h}{2}, x(t) + \frac{h}{2}K_{1}) \\
+  x(t + h) &= x(t) + hK_{2}
+\end{align}
+
+Esta \textbf{no} es la única forma de construir un RK2, de hecho, existen infinitas formas de hacerlo.
+
+Los métodos de Runge-Kutta pueden, de cierto modo, verse como una generalización del método de Euler, de manera que este podría interpretarse como un Runge-Kutta de orden 1. 
+
+\subsubsection{Métodos de orden superior}
+  El proceso matemático para obtener la formulación de un RK de orden superior es tedioso, fome y se escapa del alcance del curso, pero de todas formas revisaremos algunos métodos de orden superior, ya que estos son bastante comunes a la hora de resolver EDOs numericamente.
+
+\begin{align}
+  K_{1} &= hf(t, x(t)) \label{eq:RK4beg} \\
+  K_{2} &= f(t + \frac{h}{2}, x(t) + \frac{h}{2}K_{1}) \\
+  K_{3} &= f(t + \frac{h}{2}, x(t) + \frac{h}{2}K_{2}) \\
+  K_{4} &= f(t+ h, x(t) +hK_{3}) \\
+  x(t + h) &= x(t) +\frac{h}{6}(K_{1} + 2K_{2} + 2K_{3} + K_{4}) \label{eq:RK4end}
+\end{align}
+
+Las expresiones \eqref{eq:RK4beg}-\eqref{eq:RK4end} representan el Método de Runge-Kutta de orden 4, o RK4, este esquema es por lejos el más utilizado en la física. Tiene error de orden $\mathcal{O}(h^{4})$, y es el último RK cuya cantidad de "pasos" es igual al orden de su error (el RK5 requiere 6 pasos), por esta razón, este método es un balance entre precisión numérica y costo de computación.
+
+\begin{align}
+  K_{1} &= hf(t, x) \label{eq:shuobeg} \\
+  K_{2} &= hf(t + h, x(t) + K_{1}) \\
+  K_{3} &= hf(t + \frac{1}{2}h, x(t) + \frac{1}{4}(K_{1} + K_{2})) \\
+  x(t+h) &= x(t) + \frac{1}{6}K_{1} + \frac{1}{6}K_{2} + \frac{2}{3}K_{3} \label{eq:shuoend}
+\end{align}
+
+Las expresiones \eqref{eq:shuobeg}-\eqref{eq:shuoend} forman una formulación particular de un RK3 denominado \textbf{Método de Shu-Osher}. Este esquema mantiene la estabilidad de la solución mejor que el esquema estandar de RK3, por esta razón, se vuelve particularmente útil para resolver problemas con roce, o algún elemento disipativo.
+
+Como hemos visto, los métodos de Runge-Kutta son sumamente útiles debido a su bajo error y relativa simpleza a la hora de implementar computacionalmente, lamentablemente, a diferencia de los esquemas salto de rana, estos no conservan la energía. Esto quiere decir que si usted resuelve un sistema \textbf{sin} disipación (e.g. Movimiento planetario, resorte sin amortiguamiento) utilizando métodos RK, la solución que obtendrá va a presentar disipación o introducción de energía no deaseada a pesar de que esto difiera de la solución analítica y de la realidad física (en los ejemplos anteriores, el planeta caerá al centro de masa, y/o el resorte incrementará su amplitud hacia el infinito, como muestra la figura \ref{fig:phasespring}). Por otro lado, una pequeña ventaja de los RK, es que si la solución de la ecuación a resolver es un polinomio de grado $N$, entonces el esquema RK$N$ obtendrá la solución exacta. 
+
+\insertimage[\label{fig:phasespring}]{./img/ejemplos/phase_spring.pdf}{scale=0.75}{Espacio de fases del oscilador armónico resuelto con RK4.}
+
+\subsubsection{Formulación semi-general}
+En general, un método RK de $s$ etapas se puede escribir como
+\begin{equation}
+  K_{i} = hf\left( t_{n} + c_{i}h, y_{n} + \sum_{j = 1}^{i-1}a_{ij}K_{j} \right), \quad y_{n+1} = y_{n} + \sum_{i=1}^{s}b_{i}K_{i}
+ \end{equation}
+
+donde los coeficientes $a_{ij}$, $b_{i}$ y $c_{i}$ se obtienen mediante un arreglo de valores de la forma \eqref{eq:butch}, denominado \textbf{tabla de Butcher}
+\begin{equation} \label{eq:butch}
+  \begin{array}{c|c c c c}
+    c_{1} & 0 &  &  &  \\
+    c_{2} & a_{21} & 0 & & \\
+    \vdots & \vdots & \ddots & \ddots & \\
+    c_{s} & a_{s1} & \cdots & a_{s,s-1} & 0 \\
+    \hline
+    & b_{1} & b_{2} & \cdots & b_{s}
+  \end{array} 
+ \end{equation}
+Donde la matriz $[a_{ij}]$ se denomina \textbf{matriz de Runge-Kutta}, y los $b_{i}$ y $c_{i}$ se denominan \textbf{pesos} y \textbf{nodos}, respectivamente. Por ejemplo, la tabla de Butcher para RK4 es dada por \eqref{eq:RK4butch}
+
+\begin{equation} \label{eq:RK4butch}
+  \begin{array}{c|c c c c}
+    0 &  &  &  &  \\
+    1/2 & 1/2 & & & \\
+    1/2 & 0 & 1/2 & &  \\
+    1 & 0 & 0 & 1 &  \\
+    \hline
+    & 1/6 & 1/3 & 1/3 & 1/6
+  \end{array} 
+ \end{equation}
+
+El metodo de Shu-Osher es representado por la tabla \eqref{eq:shubutch}
+
+\begin{equation} \label{eq:shubutch}
+  \begin{array}{c|c c c }
+    0 &  &  &  \\
+    1 & 1 & & \\
+    1/2 & 1/4 & 1/4 & \\
+    \hline
+    & 1/6 & 1/3 & 2/3 
+  \end{array} 
+ \end{equation}
+
+ Finalmente, la tabla \eqref{eq:eulerbutch} representa el método de Euler 
+\begin{equation} \label{eq:eulerbutch}
+  \begin{array}{c|c }
+    0 &  \\
+    \hline
+    & 1
+  \end{array} 
+ \end{equation}
+
+\subsubsection{Implementación en Python}
 
 
 
+\subsubsection{Teorema $\Pi$ de Buckingham}
+
+Para finalizar esta sección, sería bueno mencionar un teorema importante del análisis dimensional, el \textbf{Teorema $\Pi$ de Buckingham}, el cual establece que dado un sistema físico que involucre $n$ magnitudes físicas, representadas por $k$ magnitudes fundamentales, entonces, podemos escribir el sistema por medio de $n-k$ variables adimensionales a partir de las variables originales. 
+A grandes rasgos, este nos dice que los problemas físicos no dependen del sistema de unidades en el que se representen, y además, en algunos casos, nos permite "eliminar" constantes o parametros del problema, y así determinar si estos son relevantes a la dinámica del problema, o no.
+
+Por ejemplo, consideremos el movimiento vertical de un proyectil considerando la resistencia del aire
+\begin{equation} \label{eq:dimsi}
+  v_{y}^{\prime} = -g - \mu v_{y}^{2}, \quad y(0) = y_{0}, \quad v_{y}(0) = v_{y0}
+ \end{equation}
+
+ Para comenzar a adimensionalizar, analizamos las unidades de las variables del problema en la tabla \ref{tab:units}
+
+\begin{table}
+  \centering
+  \caption{Variables y sus dimensiones}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|}
+    \hline
+    Variable & $t$ & $v_{y}$ & $v_{y0}$ & $g$ & $\mu$ & $y$ & $y_{0}$ \\
+    \hline
+    Dimensión & $T$ & $LT^{-1}$ & $LT^{-1}$ & $LT^{-2}$ & $L^{-1}$ & $L$ & $L$ \\
+    \hline
+  \end{tabular}
+  \label{tab:units}
+\end{table}
+
+Vemos entonces que tenemos 7 variables en total, expresadas en terminos de 2 unidades fundamentales, longitud ($L$) y tiempo ($T$), por lo que, adimensionalizando el sistema, podremos reducir el problema a $7-2 = 5$ variables. Ahora, como debemos eliminar \textbf{dos} variables, elegimos \textbf{dos} constantes con las cuales podamos normalizar (adimensionalizar) el sistema, para ello, notamos que podemos obtener todas las unidades involucradas en el problema multiplicando y dividiendo las constantes $v_{y0}$ y $g$. Así, definimos nuestro nuevo conjunto de variables adimensionales, denominado $\Pi$-grupo\footnote{El cual no es un grupo en el sentido matemático :c}, dado por \eqref{eq:pigroup}
+\begin{equation} \label{eq:pigroup}
+  \begin{aligned}
+    \Pi_{1} = t\cdot \left( \frac{g}{v_{y0}} \right) = \tau, \quad 
+    \Pi_{2} = v_{y}\cdot \left( \frac{1}{v_{y0}} \right) = \nu_{y},& \quad 
+    \Pi_{3} = v_{y0} \cdot \left( \frac{1}{v_{y0}} \right) = 1, \quad
+    \Pi_{4} = g \cdot \left( \frac{1}{g} \right) = 1, \quad \\
+    \Pi_{5} = \mu \cdot \left( \frac{v_{y0}^{2}}{g} \right) = \tilde{\mu}, \quad
+    \Pi_{6} = y\cdot & \left( \frac{g}{v_{y0}^{2}} \right) = \rho, \quad
+    \Pi_{7} = y_{0} \cdot \left( \frac{g}{v_{y0}^{2}} \right) = \rho_{0}
+  \end{aligned}
+\end{equation}
+
+De esta manera, podemos reescribir el probelma original en terminos de nuestras nuevas variables, de modo que
+
+\begin{equation}
+  \fracderivat{\nu_{y}}{\tau}{} = -1 -\tilde{\mu} \nu_{y}^{2}, \quad \rho(0) = \rho_{0}, \nu_{y}(0) = 1
+ \end{equation}
+ 
+ De esta manera, podemos deducir que variables son dinámicamente relevantes, con lo cual podemos analizar el problema de manera más eficiente.
+
+ Este proceso es útil, pero realmente se utiliza en dinámica de fluidos. De todas maneras, si quieren analizar un problema físico muy complejo numéricamente, es conveniente que normalizar las variables antes de programarlo, ya que, al reducir el número de variables, podemos, potencialmente, ignorar constantes muy pequeñas comparadas al resto de las variables que aumenten el error numérico (e.g. constante gravitacional para movimiento planetario).

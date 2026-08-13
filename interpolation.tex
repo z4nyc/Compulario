@@ -155,6 +155,17 @@ Para ahorrar un poco de notación, dividimos ambas ecuaciones por $N$, y notamos
   \alpha_{0} + \overline{x}\alpha_{1} &= \overline{y} \\
   \overline{x}\alpha_{0} + \overline{x^{2}}\alpha_{1} &= \overline{xy}
 \end{align}\footnote{Notar que $\overline{x^{2}} \neq \overline{x}^{2}$, el primero es el \textbf{promedio de los cuadrados}, y el último el \textbf{cuadrado de los promedios}}
-
+matricialmente,
+\begin{equation}
+  \begin{pmatrix}
+    1 &  \overline{x} \\
+    \overline{x} & \overline{x^{2}}
+  \end{pmatrix}
+  = 
+  \begin{pmatrix}
+    \overline{y} \\
+    \overline{xy}
+  \end{pmatrix}
+ \end{equation}
 De este modo, reducimos el problema a resolver un sistema de ecuaciones lineales
 

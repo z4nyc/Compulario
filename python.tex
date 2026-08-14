@@ -1,6 +1,6 @@
 \section{Breve introducción a Python}
 
-Python es un lenguaje de alto nivel con una sintaxis enfocada en la legibilidad y la simpleza. Los principios fundamentales del lenguaje pueden ser encontrados \textit{dentro} del mismo, pruebe ejecutar el código \ref{thispy}
+Python es un lenguaje de alto nivel con una sintaxis enfocada en la legibilidad y la simpleza. Los principios fundamentales del lenguaje están codificados \textit{dentro} del mismo, pruebe ejecutar el código \ref{thispy}
 
 \begin{sourcecode}[\label{thispy}]{python}{Easter egg}
   import this
@@ -29,4 +29,84 @@ If the implementation is easy to explain, it may be a good idea.
 Namespaces are one honking great idea -- let's do more of those!
 \end{sourcecode}
 
+\subsection{Tipos de variables}%\label{sub:Variables}
 
+\begin{table}
+  \centering
+  \begin{tabular}{|c|c|}
+    \hline
+    Variable & Tipo \\
+    \hline
+    \inlinesourcecode{python}{x = "holi"} & \inlinesourcecode{python}{str} Cadena de caracteres \\
+    \hline
+    \inlinesourcecode{python}{x = 14} & \inlinesourcecode{python}{int} Número entero \\
+    \hline
+    \inlinesourcecode{python}{x = 6.75} & \inlinesourcecode{python}{float} Número real (punto flotante) \\
+    \hline
+    \inlinesourcecode{python}{x = 2 + 1j} & \inlinesourcecode{python}{complex} Número complejo \\
+    \hline
+    \inlinesourcecode{python}{x = ["one", 2, 3j]} & \inlinesourcecode{python}{list} Lista de elementos \\
+    \hline
+    \inlinesourcecode{python}{x = ("uno", 2, 3.0)} & \inlinesourcecode{python}{tuple} Tupla de elementos \\
+    \hline
+    \inlinesourcecode{python}{x = \{"nombre": "Juan", "edad": 22\}} & \inlinesourcecode{python}{dict} Diccionario \\
+    \hline
+    \inlinesourcecode{python}{x = {1, 2, 3}} & \inlinesourcecode{python}{set} Conjunto \\
+    \hline
+    \inlinesourcecode{python}{x = True} & \inlinesourcecode{python}{bool} Tipo lógico (booleano) \\
+    \hline
+    \inlinesourcecode{python}{x = None} & \inlinesourcecode{python}{NoneType} Tipo Nulo \\
+    \hline
+  \end{tabular}
+  \caption{Tipos de variables en \inlinesourcecode{python}{python}}
+\end{table}
+  
+\subsection{Operaciones con listas}%\label{sub:Operaciones con listas}
+  
+ En la práctica, a menudo nos encontraremos obligados a trabajar con listas de python, por esta razón, es importante conocer las distintas maneras en que podemos extraer, añadir o eliminar elementos de estas.
+
+ \begin{sourcecode}[\label{sc:lists}]{python}{Operaciones de listas de \inlinesourcecode{python}{python}}
+    lista_ex = [7, 2, 5, 9] #Lista de ejemplo
+
+    listacat = lista_ex + [1, 6] #concatena elementos  : [7, 2, 5, 9, 1, 6]
+    listacat.append(5) #añade elemento al final de la lista : [7, 2, 5, 9, 1, 6, 5]
+    listacat.pop() #elimina el último elemento  : [7, 2, 5, 9, 1, 6]
+
+    listacat[0]  #accede al primer elemento (elemento 0) : 7
+    listacat[-1] #accede al último elemento  : 6
+    listacat[27] #tira error IndexError  : la lista solo tiene 6 elementos
+    
+    listacat[1:3] #accede elementos desde listacat[1] hasta listacat[2] : [2, 5]
+    listacat[1:] #accede elementos desde listacat[1] hasta el final : [2, 5, 9, 1, 6]
+    listacat[:-1] #accede elementos desde listacat[0] hasta el penultimo elemento 
+    listacat[::2] #recorre toda la lista con saltos de dos elementos  : [7, 5, 1]
+    listacat[::-1] #recorre la lista en orden inverso : [6, 1, 9, 5, 2, 7]
+  \end{sourcecode}
+
+  En general, la notación para recorrer listas es de la forma \inlinesourcecode{python}{lista[desde:hasta:paso]}, notando que el elemento \inlinesourcecode{python}{hasta} es excluyente, es decir, \inlinesourcecode{python}{lista[0:5]} recorrerá desde el elemento 0 hasta el elemento 4, si tocar el elemento 5.
+
+  \subsection{Numpy}%\label{sub:Numpy}
+
+  \inlinesourcecode{python}{numpy} Es una libreria de python que introduce varios elementos y operaciones matemáticas útiles para implementar los métodos presentados más adelante. Una adición importante son los \textbf{arreglos} de numpy, a grandes rasgos, estos pueden comportarse como vectores o matrices, con la diferencia que todas las operaciones las realiza \textbf{elemento a elemento}.
+
+  \begin{sourcecode}[\label{sc:arrayex}]{python}{Ejemplos de comportamiento de arreglos de numpy}
+    #Para importar numpy
+    import numpy as np
+
+    v = np.array([1, 2, 3, 4]) #vector de 4 elementos
+
+    type(v) #retorna <class "numpy.ndarray">
+    v.dtype #retorna el tipo de los elementos de v  : int64
+
+    #los arreglos de numpy solo pueden almacenar un tipo de elementos a la vez
+    #esto los diferencia de las listas de python que pueden almacenar elementos de
+    #distinto tipo, por ejemplo
+
+    v[0] = 7 + 2j #solo almacenará la parte real del complex:  array([7, 2, 3, 4])
+
+    #podemos forzar el tipo de los elemento del array para que pueda guardar complejos
+
+    v = np.array([1, 2, 3, 4], dtype = complex)
+    v[0] = 7 + 2j # array([7 + 2j, 2 + 0j, 3 + 0j, 4 + 0j])
+  \end{sourcecode}
+    

@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+plt.style.use("bmh")
+
 xi = np.array([1, 2, 3, 4, 5])
 yi = np.array([2.5, 3.8, 6.7, 7.9, 10.1]) #tendencia casi lineal
 
@@ -22,7 +24,7 @@ a0, a1 = np.linalg.solve(A, B)
 
 x = np.linspace(np.min(xi), np.max(xi), 10)
 
-plt.scatter(xi, yi)
+plt.scatter(xi, yi, label = "Datos")
 plt.plot(x, a0 + a1*x, c = "r", label = "Ajuste lineal por MMC")
 
 
@@ -30,4 +32,7 @@ plt.xlabel("$x$")
 plt.ylabel("$y$")
 
 plt.legend()
+
+plt.savefig("../../img/interpol/line_reg.pdf")
+
 plt.show()

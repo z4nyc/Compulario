@@ -156,7 +156,7 @@ Para ahorrar un poco de notación, dividimos ambas ecuaciones por $N$, y notamos
   \overline{x}\alpha_{0} + \overline{x^{2}}\alpha_{1} &= \overline{xy}
 \end{align}\footnote{Notar que $\overline{x^{2}} \neq \overline{x}^{2}$, el primero es el \textbf{promedio de los cuadrados}, y el último el \textbf{cuadrado de los promedios}}
 matricialmente,
-\begin{equation}
+\begin{equation} \label{eq:matsys}
   \begin{pmatrix}
     1 &  \overline{x} \\
     \overline{x} & \overline{x^{2}}
@@ -167,5 +167,78 @@ matricialmente,
     \overline{xy}
   \end{pmatrix}
  \end{equation}
-De este modo, reducimos el problema a resolver un sistema de ecuaciones lineales
+De este modo, reducimos el problema a resolver un sistema de ecuaciones lineales. En general, la solución al sistema \eqref{eq:matsys} será
 
+\begin{equation}
+  \alpha_{0} = \overline{y} - \alpha_{1}\overline{x}, \quad \alpha_{1} = \frac{\overline{xy} - (\overline{x})(\overline{y})}{\overline{x^{2}} - \overline{x}^{2}}
+ \end{equation}
+
+ Pero generalmente no es conveniente resolver el sistema de forma analítica, en lugar de eso, podemos utilizar \textbf{python}! En efecto,
+
+ \begin{sourcecode}[\label{syspy}]{python}{Resolución del sistema lineal \eqref{eq:matsys} en python.}
+import numpy as np
+
+#datos 100% inventados, pero podrían ser el resultado de un experimento!
+xi = np.array([1, 2, 3, 4, 5])
+yi = np.array([2.5, 3.8, 6.7, 7.9, 10.1]) #tendencia casi lineal
+
+#Definimos las variables necesarias
+xprom = np.mean(xi) #promedio de los x
+yprom = np.mean(yi) #promedio de los y
+
+x2prom = np.mean(xi**2) #promedio de los x^{2}
+xyprom = np.mean(xi*yi) #promedio de los x*y
+
+#definimos la matriz de parametros (lado izquierdo de (95))
+A = np.array([[1, xprom],
+             [xprom, x2prom]])
+
+#definimos la matriz de terminos "libres" (lado derecho de (95))
+B = np.array([[yprom],
+             [xyprom]])
+
+a0, a1 = np.linalg.solve(A, B) #utilizamos linalg.solve para resolver el sistem con numpy!
+  \end{sourcecode}
+
+Graficando los puntos del código \ref{syspy}, y la recta definida por los parámetros obtenidos al resolver el sistema, obtenemos la figura \ref{fig:line_reg}.
+
+\insertimage[\label{fig:line_reg}]{./img/interpol/line_reg.pdf}{scale = 0.75}{Ajuste lineal para distribución de puntos.}
+
+De este modo, hemos encontrado la recta que mejor se ajusta a la tendencia de los datos. Ahora, podemos generalizar este proceso para un ajuste polinomial de grado $n$, en este caso la función $\chi^{2}$ tendrá la forma
+\begin{equation}
+  \chi^{2} = \sum_{i=1}^{N}(y_{i} - f(x_{i})^{2})^{2} = \sum_{i=1}^{N}(y_{i} - a_{0} - a_{1}x_{i} - a_{2}x^{2}_{i} - \cdots - a_{n}x^{n}_{i})
+ \end{equation}
+
+ Si derivamos con respecto a cada $a_{j}$ e igualamos cada derivada a 0, obtendremos el sistema
+
+ \begin{equation} \label{eq:polsys}
+   \begin{pmatrix}
+     N & \sum x_{i} & \sum x_{i}^{2} & \cdots & \sum x_{i}^{n} \\
+     \sum x_{i} & \sum x_{i}^{2} & \sum x_{i}^{3} & \cdots & \sum x_{i}^{n+1} \\
+     \sum x_{i}^{2} & \sum x_{i}^{3} & \sum x_{i}^{4} & \cdots & \sum x_{i}^{n+2} \\
+     \vdots & \vdots & \vdots & \ddots & \vdots \\
+     \sum x_{i}^{n} & \sum x_{i}^{n+1} & \sum x_{i}^{n+2} & \cdots & \sum x_{i}^{2n}
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{0} \\
+      a_{1} \\
+      a_{2} \\
+      \vdots \\
+      a_{n}
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+      \sum y_{i} \\
+      \sum x_{i}y_{i} \\
+      \sum x_{i}^{2}y_{i} \\
+      \vdots \\
+      \sum x_{i}^{n}y_{i}
+    \end{pmatrix}
+  \end{equation}
+
+Si resolvemos el sistema \eqref{eq:polsys}, obtendremos los valores de los parámetros del polinomio de grado $n$ que se ajusta mejor a la distribución de puntos.
+
+\subsubsection{Método de mínimos cuadrados ponderado}%\label{sub:Método de mínimos cuadrados ponderado}
+
+
+  

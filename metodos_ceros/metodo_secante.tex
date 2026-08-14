@@ -1,0 +1,53 @@
+\subsection{Método de la Secante}
+
+\textit{Nota del autor: Este capítulo lo hice en el portafolio de física compu 2}
+
+¿Qué ocurre si no podemos calcular u obtener la derivada de la función?
+
+Esto es común en problemas donde la derivada puede no existir en ciertas partes, por lo que es importante analizar casos de este estilo.
+
+Para esto, nace el método de la secante, el cual se basa en la idea de aproximar la derivada de la función, de tal forma que, si consideramos diferencias lo suficientemente pequeñas entre $x_n$ y $x_{n-1}$, entonces:
+
+\begin{equation}
+    f'(x_n) \approx \frac{f(x_n) - f(x_{n-1}}{x_n - x_{n-1}}
+\end{equation}
+
+Por lo que el algoritmo a iterar constaría de la siguiente estructura:
+
+\begin{equation} \label{metodo_secante}
+x_{n+1} = x_n - \frac{x_n - x_{n-1}}{f(x_n) - f(x_{n-1})}f(x_n)
+\end{equation}
+
+Un ejemplo al utilizar este método es el siguiente:
+
+\begin{lstlisting}
+
+tolerancia = 1e-5
+
+f = lambda x: x**3 -5*x # Se define la función a utilizar
+
+    # Se define el método de la secante
+def met_secante(f,a,b,tolerancia):
+    zeros = []
+    int = np.linspace(a,b,10)
+    print(int)
+    for i in range(int.size-1): 
+
+        if f(int[i])*f(int[i+1]) <= 0:
+            a,b = int[i:i+2]
+            fa,fb = f(a), f(b)
+            m = 0
+            while (abs(fb*(b-a)/(fb-fa)) >=tolerancia):
+                bold=b 
+                b = b - fb*(b-a)/(fb-fa) 
+                fa=fb 
+                a=bold
+                fb=f(b) 
+                m +=1
+            print("Existe un cero",b,"con iteraciones de",m,"veces")
+            zeros.append(b)
+    return zeros
+
+met_secante(f,-3,3,tolerancia)
+
+\end{lstlisting}

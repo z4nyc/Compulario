@@ -1,4 +1,5 @@
 \subsection{Método de Newton}
+¿Qué ocurre si deseamos utilizar información de la propia función?
 
 Consideraremos buscar el cero de nuestra función f(x) a través del uso de la serie de Taylor.
 
@@ -10,8 +11,8 @@ f(x_0)= f(x) + (x - x_0) \cdot f'(x) + (x - x_0)^2 \cdot \frac{f''(x)}{2} + ...
 
 Pero por definición, la función evaluada en nuestro punto $x_0$ debe ser cero, así, si aproximamos la serie:
 
-\begin{equation}
-0 = f(x) + (x-x_0) \cdot f'(x)
+\begin{equation}\label{Taylor_newton_met}
+0 \approx f(x) + (x-x_0) \cdot f'(x)
 \end{equation}
 
 Podemos despejar así $x_0$, donde:
@@ -21,6 +22,8 @@ x_0 = x - \frac{f(x)}{f'(x)}
 \end{equation}
 
 Esto, nos ofrece un algoritmo que seguir, a modo de poder aproximarse a través de iteraciones hasta superar la tolerancia establecida.
+
+Notar que a diferencia del método de la bisección, aquí se hace uso de la derivada, la cual es útil para determinar con mayor rapidez el cero con respecto a la tolerncia establecida, dando así un método eficiente y que hace uso de menores iteraciones con respecto a la bisección.
 
 Consideraremos un punto inicial, tal como el valor inicial del intervalo dentro del cual estamos buscando el cero, para este caso, será $x_n$, así, la iteración del algoritmo nos dará un valor cercano al cero, siendo este denotado $x_{n+1}$, así:
 
@@ -58,7 +61,8 @@ met_newton(f,-3,3,tolerancia)
 
 \end{lstlisting}
 
-Es importante mencionar que el método de Newton es uno de los métodos más rápidos a la hora de encontrar ceros, esto, gracias al uso de la derivada de la función.
 
-A su vez, notar que si la derivada se acerca a cero, la cantidad de iteraciones comenzará a aumentar, puesto que la velocidad con la que avanza el algoritmo comienza a disminuir.
+Notar que si la derivada se acerca a cero, la cantidad de iteraciones comenzará a aumentar, puesto que la velocidad con la que avanza el algoritmo comienza a disminuir.
+
+A su vez, es importante mencionar el error que conlleva este método, notar que de (\ref{Taylor_newton_met}), aproximamos en segundo orden, así, el término $O(\delta x^2)$ desaparece de la serie de Taylor. Es importante mencionar esto puesto que, si bien el método converge de forma rápida, muchas veces podría no hacerlo debido a que los términos de ordenes superiores comienzan a generar diferencias notables con respecto a la aproximación hecha
 

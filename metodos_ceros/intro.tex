@@ -30,6 +30,32 @@ Estos, se basan en una idea principal, convertir la ecuación en la forma:
     f(x) = 0
 \end{equation}
 
-Esto, con la finalidad de que ahora nuestro trabajo, será encontrar el valor para el cual, "x" cumple con ser un "cero" de la función".
+Esto, con la finalidad de que ahora nuestro trabajo, será encontrar el valor para el cual, ''x'' cumple con ser un ''cero'' de la función.
 
-A continuación, exploraremos con más detalle esto:
+Para encontrar este cero, es importante establecer un ''intervalo'' en donde estemos trabajando (puesto que la computadora no es capaz de analizar, en caso de trabajar en $\mathbb{R}$, la recta $]-\infty,+ \infty[$, ya que es infinita), para esto, tenemos que considerar un intervalo en donde deba existir una solución.
+
+Sin embargo, ¿Cómo podemos asegurar una solución?
+
+Para ello, existe el \textbf{Teorema de Bolzano}, el cual establece que:
+
+\begin{quote}
+\textit{Para una función continua en un intervalo cerrado $[a,b]$, tal que $f(a) \cdot f(b) < 0$, entonces debe existir $c \in [a,b]$ tal que $f(c) = 0$}
+\end{quote}
+
+Así, ya podemos concluir que el método con el que trabajemos esté siendo usado en un intervalo donde la solución exista.
+
+Es importante considerar que debido a que utilizaremos métodos numéricos, la solución que encontraremos nunca será del todo correcta, sino, tan solo una aproximación a la respuesta real o analítica.
+
+Por ello, es importante tener en cuenta \textit{¿Qué tan cerca queremos o podemos estar de nuestra respuesta real?}. Para esto, es importante tener en cuenta el uso de una medida de ''Tolerancia''.
+
+La tolerancia, se puede definir como el intervalo más pequeño sobre el cual vamos a realizar el algoritmo de búsqueda de nuestro cero. Cuando nuestros intervalos sean suficientemente pequeños, le indicaremos al programa que detenga el algoritmo y se quede con el valor o respuesta dentro del intervalo encontrado.
+
+Así, si la tolerancia (denotada como $\delta$) cumple que: $f(x_i) < \delta$, entonces la solución numérica encontrada será $x_i$.
+
+Esto conlleva a la cuestión ¿Cómo podemos medir el error que se encuentra dentro de nuestro método?
+
+
+% Arreglar esto!!!
+Para esto, es importante analizar \textit{qué tan rápido aumenta el error}, tema del cual se verá dentro de cada método.
+
+A continuación, exploraremos algunos de los métodos para encontrar ceros.

@@ -1,45 +1,28 @@
-\subsection{Método de la Secante}
+\subsection{Método de la Bisección}
 
-Consideremos la siguiente ecuación:
+Comúnmente conocido bisección solamente, es el método más fácil de generar (y a su vez, el de explicar)
 
-\begin{equation}\label{ec_biseccion_cos}
-\cos x - 2x - x^2 = 0
+Consideremos una ecuación de la forma:
+
+\begin{equation}
+    f(x) = 0
 \end{equation}
 
-Podemos notar que esta ecuación (debido a los términos que posee) a simple vista no tiene una solución analítica que calcular, sin embargo, podemos utilizar métodos numéricos.
+Donde sabemos por \textit{Teorema de Bolzano} que existe una solución en el intervalo $[a,b]$. 
 
-El método de la bisección se basa en analizar entre que valores estamos trabajando o buscando la solución. Consideremos para este caso, el intervalo $[0,\frac{\pi}{2}]$.
+Para realizar el método de la bisección, dividiremos el intervalo en dos partes, sea $c = \frac{a+b}{2}$, así, ahora existen dos intervalos, $[a, c]$ y $[c, b]$.
 
-Es posible notar, evaluando dentro de los límites de los intervalos, que:
-
-\begin{itemize}
-\item $f(0) = \cos 0 - 0 -0 > 0$
-\item $f(\frac{\pi}{2}) = \cos \frac{\pi}{2} - \pi - \left(\frac{\pi}{2}\right)^2 < 0$
-\end{itemize}
-
-Así, podemos notar que existe una región dentro del intervalo, donde la función que establecimos cambia de signo, bien, que \textbf{El producto entre la función evaluada en los límites del intervalo es menor a cero}.
-
-A partir de esto, hay que recordar el \textit{Teorema de Bolzano}, el cual afirma que:
-
-\begin{quote}
-Si en una función continua, existe un cambio de signo en los límites de un intervalo cerrado, entonces esta posee al menos una raíz.
-\end{quote}
-
-Así, podemos confirmar que existe una solución a la ecuación (\ref{ec_biseccion_cos}) dentro del intervalo $[0,\frac{\pi}{2}]$, a partir de esto, consideraremos realizar el siguiente proceso:
-
-Dividiremos el intervalo actual en dos intervalos con la misma distancia, sean $[0,\frac{\pi}{4}]$, $[\frac{\pi}{4},\frac{\pi}{2}]$. Y evaluaremos los límites sobre el primero de estos. De aquí, tendremos 3 posibles respuestas:
+Ahora, analizaremos cada intervalo por separado a través del \textit{Teorema de Bolzano}, esto es:
 
 \begin{itemize}
-    \item Si $f(0) \cdot f(\frac{\pi}{4}) < 0$: La solución debe encontrarse en este intervalo, por lo que nos centraremos en trabajar aquí.
-    \item Si $f(0) \cdot f(\frac{\pi}{4}) = 0$: La solución está en uno de los límites de los intervalos, como en el proceso anterior el resultado fue negativo, entonces podemos confirmar que la solución es $x= \frac{\pi}{4}$
-    \item Si $f(0) \cdot f(\frac{\pi}{4}) > 0$: La solución no está dentro de este intervalo, así, debemos trabajar con el intervalo siguiente ($\frac{\pi}{4}, \frac{\pi}{2}$).
+    \item Si $f(a) \cdot f(c) < 0$: La solución debe encontrarse en este intervalo, por lo que nos centraremos en trabajar aquí.
+    \item Si $f(a) \cdot f(c) = 0$: La solución está en uno de los límites de los intervalos, como en el proceso anterior el resultado fue negativo, entonces podemos confirmar que la solución es $x= c$
+    \item Si $f(a) \cdot f(c) > 0$: La solución no está dentro de este intervalo, así, debemos trabajar con el intervalo siguiente ($[c,b]$).
 \end{itemize}
 
-Una vez realizado este análisis, encontraremos la solución o bien, el intervalo donde se encuentra. A partir de esto, podemos seguir realizando el mismo algoritmo para encontrar intervalos más pequeños en donde nuestra solución se debe encontrar, esto, hasta alcanzar el límite o tolerancia establecida.
+Una vez realizado este análisis, encontraremos la solución o bien, el intervalo donde se encuentra. Siguiendo esto, podemos seguir realizando el mismo algoritmo para encontrar intervalos más pequeños en donde nuestra solución se debe encontrar, esto, hasta que la función evaluada en el valor medio (El valor $c$ que generamos al dividir el intervalo) sea menor a la Tolerancia con la que estamos trabajando.
 
-La tolerancia, dentro de este capítulo, se define como el intervalo más pequeño sobre el cual vamos a realizar el algoritmo, cuando nuestros intervalos sean suficientemente pequeños, le indicaremos al programa que detenga el algoritmo y se quede con el valor intermedio del intervalo encontrado.
-
-De esta forma, podemos catalogar el método de la bisección de forma general
+De esta forma, podemos catalogar el método de la bisección de forma general:
 
 Considerar una ecuación de la forma $f(x) = 0$ en el intervalo $[a,b]$
 
@@ -49,7 +32,7 @@ Considerar una ecuación de la forma $f(x) = 0$ en el intervalo $[a,b]$
     \item Dividimos el intervalo en dos partes, sea $[a,c], [c,b]$
     \item Analizamos el producto de la función evaluada en los límites del primer intervalo
     \item Si este producto es negativo, la solución debe encontrarse en este intervalo, por que dividimos y volvemos a aplicar el mismo análisis
-    \item Repetimos este proceso hasta que la distancia del intervalo sea menor que nuestro valor de tolerancia.
+    \item Repetimos este proceso hasta que la función evaluada en el punto medio sea menor a nuestra tolerancia.
 
 \end{itemize}
 
@@ -57,14 +40,20 @@ Podemos observar un ejemplo de este a través del siguiente código:
 \begin{lstlisting}
 f = lambda x: np.cos(x)
 tolerancia = 1e-10
+i=0
 while abs(a-b) > tolerancia:
+    i += 1
     if f(a)*f(b) < 0:
         c = (b+a)/2
         if f(a)*f(c) < 0:
             b = c
         else: 
             a = c
-print(c)
+print("El cero encontrado es", c, "con", i, "iteraciones.")
 \end{lstlisting}
 
 Para nuestro caso, hemos de elegir la función \textit{cos(x)}, si consideramos el intervalo $[0,2]$, podemos encontrar el cero que se posiciona en $x = \frac{\pi}{2}$, donde bajo este código, obtenemos un valor de $x \approx 1.5707963$, bastante cercano al buscado.
+
+Finalmente, es importante considerar que este método no considera particularidades de la función $f(x)$, en consecuencia, el tiempo o iteraciones que conlleve será dependiente únicamente del cálculo numérico y la tolerancia que se le agregue.
+
+Ahora bien, \textbf{¿Cuál es la proporción de error que existe en este método?}

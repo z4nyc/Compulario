@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 
 #Condiciones Iniciales
 y0 = 0.0
-v0 = -1.0
+v0 =-1.0
 
 
 #Función conocida
-def g(t, y_0, v_0, omega=1, g=9.8):
+def g(t, y_0, v_0, omega=2.0, g=9.8):
     return (y_0 + (g / (omega)**2)) * np.cos(omega * t) + v_0 / omega * np.sin(omega * t) - g/(omega**2)
 
 Ttotal = 25.0
@@ -15,7 +15,7 @@ N = 1000  #tomaremos mil pasos
 h = Ttotal / N
 
 # Implementación del método
-def f(x, omega=1.0, g=9.8):
+def f(x, omega=2.0, g=9.8):
     y,v = x
 
     return np.array([v, -y * omega ** 2 - g])

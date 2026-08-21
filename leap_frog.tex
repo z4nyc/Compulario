@@ -1,0 +1,425 @@
+\newpage
+\section{Ecuaciones Diferenciales Ordinarias}
+ \subsection{Método de Euler}
+  \subsubsection{Definición}
+ El método de Euler es el acercamiento más simple a la resolución numérica de 
+  ecuaciones diferenciales ordinarias. Consiste es realizar una simple aproximación en Taylor a primer orden. Dada la simplicidad del método, se abordarán de inmediato los casos en una y varias dimensiones.\\
+  Considere que busca resolver una ecuación diferencial ordinaria de orden $n$. Como recordará de su curso de ecuaciones diferenciales ordinarias, podemos representar este problema como una EDO de primer orden en forma vectorial: 
+  \begin{equation}
+   \begin{pmatrix}
+     \dot{x}_1 \\
+     \dot{x}_2 \\
+     \vdots \\
+     \dot{x}_n
+   \end{pmatrix} = 
+    \frac{d\vec{x}}{dt}
+    = \vec{f}\left( \vec{x}, t \right), \label{eq: matrix_form}
+  \end{equation}
+  con $\vec{x} = \left( x_1(t), x_2(t), \dots, x_n(t) \right)$ un vector de más funciones a encontrar y $\vec{f}$ una función vectorial conocida. En su curso de EDO quizás vio esta formulación con la forma:
+  \begin{equation}
+  \begin{pmatrix}
+     \dot{x}_1 \\
+     \dot{x}_2 \\
+     \vdots \\
+     \dot{x}_{n-1}\\
+     \dot{x}_n
+   \end{pmatrix} = 
+    \begin{pmatrix}
+      x_2\\
+      x_3 \\
+     \vdots \\
+      x_n \\
+      g(x)
+   \end{pmatrix}, 
+  \end{equation}
+  con $g(x)$ generalmente la propia EDO en cuestión. Esta formulación es sumamente útil y será utilizada más adelante. Aproximando \eqref{eq: matrix_form} como una derivada adelantada, tenemos el \textbf{método de Euler}:
+  \begin{equation}
+    \vec{x}(t+h) = \vec{x}(t) + h\vec{f}(\vec{x},t) + \mathcal{O}(h^2).
+\end{equation}
+Esto define un método de primer orden. En general, el orden  $n$ de un integrador o método se suele expresar como el $n$ tal que los pasos tienen error de orden $\mathcal{O}(h^{n+1})$. Geométricamente, lo que sucede paso a paso es que partimos situados en un punto $\vec{x}_0$ dado por una condición inicial en un tiempo $t_0$, y avanzamos al siguiente punto siguiendo el vector tangente $f(\vec{x}_0,t)$. Abordaremos el algoritmo con un problema.
+
+\subsubsubsectionanum{Ejemplo}
+Consideremos un objeto de masa $m$ colgado de un resorte de constante elástica $k$, en un campo gravitatorio de magnitud $g$. Si el origen del sistema de referencia se encuentra ubicado en el resorte en su longitud natural, entonces la altura $y(t)$ se rige por la ecuación diferencial:
+\begin{equation}
+ y''(t) + \omega^2 y(t) = -g,
+\end{equation}
+donde $\omega = \sqrt{k/m}$. Si tenemos las condiciones iniciales $y(0), y'(0)$, la solución analítica es:
+\begin{equation}
+  y(t) = \left[ y(0) + \frac{g}{\omega^2} \right]\cos(\omega t) + \frac{y'(0)}{\omega} \sin(\omega t) - \frac{g}{\omega^2}.
+\end{equation}
+Como la ecuación diferencial es de segundo orden, podemos expresarla en forma vectorial para reducir el problema a una ecuación diferencial de primer orden. Tenemos:
+\begin{equation}
+  \frac{dy}{dt} = v(t), \qquad \frac{dv}{dt} = -\omega^2 y(t) - g,
+\end{equation}
+es decir, podemos reescribir el problema como:
+\begin{equation}
+  \vec{x} = \begin{pmatrix} y(t) \\ v(t)  \end{pmatrix}, \qquad 
+    \vec{f}(\vec{x},t) = \begin{pmatrix} v(t) \\ -\omega^2 y(t) -g  \end{pmatrix}, \qquad 
+      \frac{d\vec{x}}{dt} = \vec{f}(\vec{x},t).
+\end{equation}
+De esta forma, el algoritmo relevante del método es\footnote{Este código es un esquema. Para ver código real, puede visitar el repositorio.}:
+\begin{sourcecode}{python}{Algoritmo básico del método de Euler.}
+  def f(x, omega=1.0, g = 9.8): # creamos el vector f, acá hay que definir omega
+      y, v = x # desempaquetamos las variables
+
+      return array([v, -y * omega ** 2 - g]) 
+
+  x = zeros([Ntiempo, 2]) # Definimos un vector x con los pares (x,v) a cada paso
+  x[0] = [y0, v0] # Imponemos que la primera entrada de x sean las cond. iniciales
+
+
+ for n in range (Ntiempo):
+     x[n+1] = x[n] + h * f(x[n], omega, g) #partiendo de x[0], cambia los pares (0,0) por los valores del método
+ #finalmente, solo hace falta desempaquetar el resultado del vector x.
+\end{sourcecode}
+ Finalmente, para ver la eficacia del método, se ha simulado tanto la solución analítica como la solución mediante el método de Euler en la figura \ref{fig:euler}. Podemos apreciar como \textbf{rápidamente} la solución numérica difiere de la solución analítica. En particular, vemos como la amplitud de la oscilación va aumentando conforme avanza el tiempo, ¿tiene esto significado físico? La respuesta se aborda en la siguiente sección.
+\begin{figure}
+  \includegraphics[scale=0.5]{Euler.pdf}
+  \caption{Soluciones al problema del resorte colgando, obtenidas de forma analítica y con el método de Euler. } \label{fig:euler}
+\end{figure}
+
+ \subsection{Método del salto de la rana}
+  \subsubsection{Motivación}
+   Si bien el método de Euler es un approach simple y familiar (pero no muy estable) a la resolución numérica 
+   de EDO's, \textbf{físicamente} plantea un problema importante: \textbf{no conserva la energía del sistema}. Un rápido cálculo nos muestra esto:\\
+   \subsubsubsectionanum{Ejemplo}
+    Para un sistema masa-resorte colgando, se puede mostrar que \textbf{energía total} del sistema es de la forma:
+   \begin{equation}
+     E(t) = \frac{1}{2}mv^2 + \frac{1}{2} m^2 \omega^2 \left( y + \frac{g}{\omega^2} \right)^2. \label{eq:ener_euler}
+  \end{equation}
+  Luego, bajo el método de Euler, la energía en tiempos discretos es:
+
+  \begin{align*}
+  E_{n+1} &= \frac{1}{2} m v_{n+1}^2 + \frac{1}{2} m^2\omega^2 \left( y_{n+1} + \frac{g}{\omega^2} \right)^2 \,, \\
+  &= \frac{1}{2} m \left[ v_n - h(\omega^2 y_n + g) \right]^2 + \frac{1}{2}m^2 \omega^2 \left[ y_n + h v_n + \frac{g}{\omega^2} \right]^2 \,, \\
+  &= (1 + \omega^2 h^2) \left[ \frac{1}{2}m v_n^2 + \frac{1}{2}m^2 \omega^2 \left( y_n + \frac{g}{\omega^2} \right)^2 \right] \,, \\
+  &= (1 + \omega^2 h^2) E_n \,.
+  \end{align*}
+Es decir, el método de Euler no conserva la energía pues $E_{n+1} > E_n$ para todo $n$. Puede ver esto también modelando la ecuación \eqref{eq:ener_euler}, o realizando un gráfico de rapidez versus posición (una especie de espacio de fases) mientras evoluciona el tiempo (ver figura \ref{fig:dos_graficos}). El hecho que la trayectoria no sea cerrada en el espacio de fases es consecuencia directa de la pérdida de energía.  
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img/ejemplos/E(t).pdf}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img/ejemplos/phase_space_Euler.pdf}
+    \end{minipage}
+    \caption{Gráficos de energía y espacio de fases para el método de Euler.}
+    \label{fig:dos_graficos}
+\end{figure}
+
+\subsubsection{Definición: Esquemas de 2 y 3 Pasos}
+Este método resulta sumamente útil al momento de lidiar con sistemas en los cuales hay \textbf{conservación de la energía mecánica} puesto que su formulación basada en pasos semi-enteros incorpora una estructura simpléctica\footnote{La demostración de  esto es muy compleja. Para más acerca de integradores simplécticos, puede leer este \href{https://pubs.aip.org/aapt/ajp/article-abstract/73/10/938/1042416/Symplectic-integrators-An-introduction?redirectedFrom=fulltext}{artículo}, que puede encontrar \href{https://mega.nz/folder/11A3gZ7T\#3c6jStOaqaUSs-BFee0SwQ/folder/8lB1nTqS}{aquí}.} (conserva la energía). Este tipo de métodos suelen ser llamados \textbf{integradores simplécticos.} El método en cuestión consiste en usar un esquema de derivadas centradas que permiten que, para un paso $\Delta t$, se actualice la información de la rapidez dos veces por paso. Una primera formulación del método consiste en definir:
+
+  \begin{align}
+    v(t+h/2) &= \frac{x(t+h) - x(t)}{h} + \mathcal{O}(h^2),\\
+    a(t) &= \frac{v(t +h/2) - v(t-h/2)}{h} + \mathcal{O}(h^2),
+  \end{align}
+  lo que define un integrador de segundo orden con 2 pasos. Multiplicando ambos lados por $h$, tenemos :
+  \begin{align}
+    v(t+h/2) &= v(t-h/2) + ha(t) + \mathcal{O}(h^3),\\
+    x(t+h) &= x(t) + hv(t+h/2) + \mathcal{O}(h^3).
+  \end{align}
+  Note que el método requiere una condición inicial $v(t_0) = v_0$ a partir del cual computamos los $v_{n+1/2}$ (esto siempre ocurrirá en esquemas basados en derivadas centradas) además de tener información acerca de la aceleración de antemano. Por esto, el esquema suele iniciarse con el método de Euler\footnote{Esto no significa que todo el método sea tipo Euler.}:
+  $$
+  v(h/2) = v(0) + \frac{h}{2}a(0).
+  $$
+  Bajo estos supuestos, el algoritmo relevante que utiliza el método es     
+    \begin{sourcecode}{python}{Algoritmo básico del método leap-frog.}
+      # Condiciones iniciales
+      x[0], v[0] = x0, v0
+      # Metodo de Euler para avanzar a t = h/2
+      # Escribimos v_1/2 = v_0 + (h/2)a_0
+      v[0] = v[0] + (h/2) * a[0] # v[0] representa a v_1/2
+      
+      # Metodo del salto de rana
+      for n in range(N):
+          x[n+1] = x[n] + h * v[n] #v[n] representa v_n+1/2
+          v[n+1] = v[n] + h * a[n] #v[n+1] representa v_n+3/2
+          ventero[n+1] = 0.5 * (v[n+1] + v[n]) # calcula v_n
+    \end{sourcecode}
+
+    Notemos que bajo este esquema, no tenemos información acerca de la velocidad en tiempos enteros, por lo que generalmente se suele considerar la media aritmética entre 2 velocidades adyacentes (esto se ha implementado en la última línea). \\
+
+    También es útil implementar este método como un esquema de 3 pasos, calculando velocidades tanto a tiempos enteros como semi-enteros. La utilidad de esta formulación es que dejamos de depender del método de Euler para inicializar $v_{1/2}$. A continuación, se muestra el razonamiento para componer el esquema.
+    Consideremos la derivada centrada en $t+h/2$:
+
+    \begin{align}
+      v(t+h/2) &= \frac{x(t+h) - x(t)}{2\cdot h/2} + \mathcal{O}(h^2), \\
+      \Rightarrow x(t+h) &= x(t) + hv(t+h/2) + \mathcal{O}(h^3). \label{eq: pos_frog}
+    \end{align}
+    Ahora, para la velocidad, consideremos la derivada centrada en $t$ de $v$ :
+    \begin{align}
+      a(t) = v'(t) &= \frac{v(t+h/2) - v(t-h/2)}{h} + \mathcal{O}(h^2) \\
+      \Rightarrow v(t+h/2) &= v(t-h/2) + ha(t) + \mathcal{O}(h^3).
+    \end{align}
+    Expandiendo $v(t-h/2)$ alrededor de $t$, tenemos:
+    \begin{align}
+      v(t+h/2) &= v(t) -\frac{h}{2}v'(t) + ha(t) + \mathcal{O}(h^3), \\
+      \Rightarrow v(t+h/2) &= v(t) + \frac{h}{2}a(t) + \mathcal{O}(h^3). \label{eq:v_half-frog}
+    \end{align}
+    Finalmente, para obtener el término $v(t+h)$ (el paso entero), se considera una expansión a primer orden centrada en $t +h/2$:
+    \begin{equation}
+      v(t+h) = v(t+h/2) + \frac{h}{2}a(t+h/2). \label{eq: integer-frog}
+    \end{equation}
+    Las ecuaciones \eqref{eq: pos_frog}, \eqref{eq:v_half-frog} y \eqref{eq: integer-frog} definen el esquema de 3 pasos del método. En forma de código, el algoritmo relevante es:
+
+    \begin{sourcecode}{python}{Esquema de 3 pasos para el salto de rana.}
+      # condiciones iniciales
+      x[0], v[0] = x0, v0
+
+      # Metodo de salto de rana
+      for n in range(N-1):
+          vmedio = v[n] + (h/2) * a[n] # v[n] representa v_n
+          x[n+1] = x[n] + h * vmedio  # vmedio representa v_n+1/2
+          v[n+1] = vmedio + (h/2) * a[n+1] # v[n+1] representa v_n+1
+    \end{sourcecode}
+    Generalmente, al momento de implementar el método, el problema se suele abordar de manera vectorial, y uno resuelve el sistema:
+    \begin{equation}
+     \begin{pmatrix}
+       \dot{x} \\
+       \dot{v}
+     \end{pmatrix} = 
+      \begin{pmatrix}
+        v \\
+        a
+      \end{pmatrix}
+    \end{equation}
+
+  \subsubsubsectionanum{Ejemplo}
+ Volviendo al problema del resorte colgando que abordamos con el método de Euler, tenemos utilizando el método leap-frog con un esquema de tres pasos, el código base (con algunos agregados) es:
+
+ \begin{sourcecode}{python}{Esquema de tres pasos para el resorte colgando.}
+def _condiciones_iniciales(t, x0, y0):
+    x0 = np.asarray(x0)
+    y0 = np.asarray(y0)
+    x = np.zeros((len(t),) + x0.shape)
+    y= np.zeros((len(t),) + y0.shape)
+    x[0] = x0
+    y[0] = y0
+    return x,y
+
+def dy(a, omega = 2.0, g= 9.8):
+        return -1 * ( omega **2 ) * a - g
+
+def leapfrog(dy, x0, y0, t, **kwargs):
+    dt = np.diff(t) #paso
+    x, y = _condiciones_iniciales(t, x0, y0)    
+    dy0 = dy(x0) 
+    for n in range(t.size-1):
+        ymedio = y[n] + 0.5 * dt[n] * dy0
+        x[n+1] = x[n] + dt[n] * ymedio
+        dy0 = dy(x[n+1])
+        y[n+1] = ymedio + 0.5 * dt[n] * dy0
+    return  x, y
+
+t = np.linspace(0,10,1000)
+u,w = leapfrog(dy, 0.0, -1.0,t, omega=2.0)
+
+omega = 2.0
+E = np.zeros(len(t))
+E[0] = 0.5 * w[0]**2 + 0.5 * omega **2 * (u[0] + 9.8 / (omega ** 2))**2
+
+for n in range(len(E)-1):
+    # Calcular energía en el paso n+1
+    E[n + 1] = 0.5 * w[n+1]**2 + 0.5 * (omega) **2 * (u[n+1] + 9.8 / (omega**2)) ** 2
+ \end{sourcecode}
+ Tenemos las soluciones para el espacio de fases y para la energía en la figura \ref{fig:frog_spring}. Notemos como la trayectoria (aproximadamente) es cerrada, y que la energía 
+ es conservada (aproximadamente, notar que las discrepancias oscilan en las milésimas). 
+ \begin{figure}
+   \includegraphics[scale=0.5]{frog.pdf} 
+   \caption{Soluciones obtenidas por el método leap-frog de 3 pasos / velocity Verlet para el resorte colgando.}
+   \label{fig:frog_spring}
+ \end{figure}
+
+\newpage
+\subsection{Métodos Runge-Kutta}
+    
+Los métodos de Runge-Kutta son una familia de métodos numericos iterativos para resolver ecuaciones diferenciales ordinarias, utilizando el valor de la solución en $t_{0}$ para calcular la solución en $t_{1} = t_{0} + h$, y reptiendo este proceso hasta el tiempo final $t_{n} = t_{n-1} + h$, obteniendo así los valores aproximados de la solución en un intervalo de tiempo discreto y finito. Estos son probablemente los más usados en la física dado su versatilidad y su relativa simpleza, podrá notar que este método es bastante parecido al método de Euler discutido al inicio de este capitulo. Similarmente a los esquemas anteriores, iniciamos con un problema del tipo
+\begin{equation}
+  \fracderivat{x}{t}{} = f(t, x)
+ \end{equation}
+
+Podemos aproximar una solución considerando expansiones de $x(t)$ y $x(t+ h)$, con $h > 0$, centradas en $t + \frac{h}{2}$, en efecto:
+\begin{align*}
+  x(t + h) &= x(t + \frac{h}{2}) + x^{\prime}(t + \frac{h}{2}) \left(\frac{h}{2} \right) + \frac{1}{2}x^{\prime \prime}(t + \frac{h}{2})\left( \frac{h}{2} \right)^{2} + \mathcal{O}(h^{3}) \\
+  x(t) &= x(t + \frac{h}{2}) - x^{\prime}(t + \frac{h}{2}) \left(\frac{h}{2} \right) + \frac{1}{2}x^{\prime \prime}(t + \frac{h}{2})\left( \frac{h}{2} \right)^{2} - \mathcal{O}(h^{3})
+\end{align*}
+
+Restando ambas expresiones obtendremos
+\begin{equation} \label{eq:second}
+  x(t + h) = x(t) + x^{\prime}(t + \frac{h}{2}) h + \mathcal{O}(h^{3})
+ \end{equation}
+Pero, del enunciado del problema, $x^{\prime}(t + \frac{h}{2}) = f(t + \frac{h}{2}, x(t + \frac{h}{2}))$. De momento parece que no hemos hecho nada, pues solo hemos cambiado el problema de no conocer $x(t)$ a no conocer $x(t + \frac{h}{2})$, pero si recordamos el método de Euler,
+\begin{equation} \label{eq:first}
+  x(t + \frac{h}{2}) = x(t) + f(t, x(t))\frac{h}{2}
+ \end{equation}
+
+Las expresiones \eqref{eq:first} y \eqref{eq:second} consituyen el método de Runge-Kutta de orden 2, o simplemente, RK2. En la literatura se suele representar de la forma
+\begin{align}
+  K_{1} &= f(t, x(t)) \\
+  K_{2} &= f(t + \frac{h}{2}, x(t) + \frac{h}{2}K_{1}) \\
+  x(t + h) &= x(t) + hK_{2}
+\end{align}
+
+Esta \textbf{no} es la única forma de construir un RK2, de hecho, existen infinitas formas de hacerlo.
+
+Los métodos de Runge-Kutta pueden, de cierto modo, verse como una generalización del método de Euler, de manera que este podría interpretarse como un Runge-Kutta de orden 1. 
+
+\subsubsection{Métodos de orden superior}
+  El proceso matemático para obtener la formulación de un RK de orden superior es tedioso, fome y se escapa del alcance del curso, pero de todas formas revisaremos algunos métodos de orden superior, ya que estos son bastante comunes a la hora de resolver EDOs numericamente.
+
+\begin{align}
+  K_{1} &= hf(t, x(t)) \label{eq:RK4beg} \\
+  K_{2} &= f(t + \frac{h}{2}, x(t) + \frac{h}{2}K_{1}) \\
+  K_{3} &= f(t + \frac{h}{2}, x(t) + \frac{h}{2}K_{2}) \\
+  K_{4} &= f(t+ h, x(t) +hK_{3}) \\
+  x(t + h) &= x(t) +\frac{h}{6}(K_{1} + 2K_{2} + 2K_{3} + K_{4}) \label{eq:RK4end}
+\end{align}
+
+Las expresiones \eqref{eq:RK4beg}-\eqref{eq:RK4end} representan el Método de Runge-Kutta de orden 4, o RK4, este esquema es por lejos el más utilizado en la física. Tiene error de orden $\mathcal{O}(h^{4})$, y es el último RK cuya cantidad de "pasos" es igual al orden de su error (el RK5 requiere 6 pasos), por esta razón, este método es un balance entre precisión numérica y costo de computación.
+
+\begin{align}
+  K_{1} &= hf(t, x) \label{eq:shuobeg} \\
+  K_{2} &= hf(t + h, x(t) + K_{1}) \\
+  K_{3} &= hf(t + \frac{1}{2}h, x(t) + \frac{1}{4}(K_{1} + K_{2})) \\
+  x(t+h) &= x(t) + \frac{1}{6}K_{1} + \frac{1}{6}K_{2} + \frac{2}{3}K_{3} \label{eq:shuoend}
+\end{align}
+
+Las expresiones \eqref{eq:shuobeg}-\eqref{eq:shuoend} forman una formulación particular de un RK3 denominado \textbf{Método de Shu-Osher}. Este esquema mantiene la estabilidad de la solución mejor que el esquema estandar de RK3, por esta razón, se vuelve particularmente útil para resolver problemas con roce, o algún elemento disipativo.
+
+Como hemos visto, los métodos de Runge-Kutta son sumamente útiles debido a su bajo error y relativa simpleza a la hora de implementar computacionalmente, lamentablemente, a diferencia de los esquemas salto de rana, estos no conservan la energía. Esto quiere decir que si usted resuelve un sistema \textbf{sin} disipación (e.g. Movimiento planetario, resorte sin amortiguamiento) utilizando métodos RK, la solución que obtendrá va a presentar disipación o introducción de energía no deaseada a pesar de que esto difiera de la solución analítica y de la realidad física (en los ejemplos anteriores, el planeta caerá al centro de masa, y/o el resorte incrementará su amplitud hacia el infinito, como muestra la figura \ref{fig:phasespring}). Por otro lado, una pequeña ventaja de los RK, es que si la solución de la ecuación a resolver es un polinomio de grado $N$, entonces el esquema RK$N$ obtendrá la solución exacta. 
+
+\insertimage[\label{fig:phasespring}]{./img/ejemplos/phase_spring.pdf}{scale=0.75}{Espacio de fases del oscilador armónico resuelto con RK4.}
+
+\subsubsection{Formulación semi-general}
+En general, un método RK de $s$ etapas se puede escribir como
+\begin{equation}
+  K_{i} = hf\left( t_{n} + c_{i}h, y_{n} + \sum_{j = 1}^{i-1}a_{ij}K_{j} \right), \quad y_{n+1} = y_{n} + \sum_{i=1}^{s}b_{i}K_{i}
+ \end{equation}
+
+donde los coeficientes $a_{ij}$, $b_{i}$ y $c_{i}$ se obtienen mediante un arreglo de valores de la forma \eqref{eq:butch}, denominado \textbf{tabla de Butcher}
+\begin{equation} \label{eq:butch}
+  \begin{array}{c|c c c c}
+    c_{1} & 0 &  &  &  \\
+    c_{2} & a_{21} & 0 & & \\
+    \vdots & \vdots & \ddots & \ddots & \\
+    c_{s} & a_{s1} & \cdots & a_{s,s-1} & 0 \\
+    \hline
+    & b_{1} & b_{2} & \cdots & b_{s}
+  \end{array} 
+ \end{equation}
+Donde la matriz $[a_{ij}]$ se denomina \textbf{matriz de Runge-Kutta}, y los $b_{i}$ y $c_{i}$ se denominan \textbf{pesos} y \textbf{nodos}, respectivamente. Por ejemplo, la tabla de Butcher para RK4 es dada por \eqref{eq:RK4butch}
+
+\begin{equation} \label{eq:RK4butch}
+  \begin{array}{c|c c c c}
+    0 &  &  &  &  \\
+    1/2 & 1/2 & & & \\
+    1/2 & 0 & 1/2 & &  \\
+    1 & 0 & 0 & 1 &  \\
+    \hline
+    & 1/6 & 1/3 & 1/3 & 1/6
+  \end{array} 
+ \end{equation}
+
+El metodo de Shu-Osher es representado por la tabla \eqref{eq:shubutch}
+
+\begin{equation} \label{eq:shubutch}
+  \begin{array}{c|c c c }
+    0 &  &  &  \\
+    1 & 1 & & \\
+    1/2 & 1/4 & 1/4 & \\
+    \hline
+    & 1/6 & 1/3 & 2/3 
+  \end{array} 
+ \end{equation}
+
+ Finalmente, la tabla \eqref{eq:eulerbutch} representa el método de Euler 
+\begin{equation} \label{eq:eulerbutch}
+  \begin{array}{c|c }
+    0 &  \\
+    \hline
+    & 1
+  \end{array} 
+ \end{equation}
+
+\subsubsection{Implementación en Python}
+
+
+
+\subsubsection{Teorema $\Pi$ de Buckingham}
+
+Para finalizar esta sección, sería bueno mencionar un teorema importante del análisis dimensional, el \textbf{Teorema $\Pi$ de Buckingham}, el cual establece que dado un sistema físico que involucre $n$ magnitudes físicas, representadas por $k$ magnitudes fundamentales, entonces, podemos escribir el sistema por medio de $n-k$ variables adimensionales a partir de las variables originales. 
+A grandes rasgos, este nos dice que los problemas físicos no dependen del sistema de unidades en el que se representen, y además, en algunos casos, nos permite "eliminar" constantes o parametros del problema, y así determinar si estos son relevantes a la dinámica del problema, o no.
+
+Por ejemplo, consideremos el movimiento vertical de un proyectil considerando la resistencia del aire
+\begin{equation} \label{eq:dimsi}
+  v_{y}^{\prime} = -g - \mu v_{y}^{2}, \quad y(0) = y_{0}, \quad v_{y}(0) = v_{y0}
+ \end{equation}
+
+ Para comenzar a adimensionalizar, analizamos las unidades de las variables del problema en la tabla \ref{tab:units}
+
+\begin{table}
+  \centering
+  \caption{Variables y sus dimensiones}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|}
+    \hline
+    Variable & $t$ & $v_{y}$ & $v_{y0}$ & $g$ & $\mu$ & $y$ & $y_{0}$ \\
+    \hline
+    Dimensión & $T$ & $LT^{-1}$ & $LT^{-1}$ & $LT^{-2}$ & $L^{-1}$ & $L$ & $L$ \\
+    \hline
+  \end{tabular}
+  \label{tab:units}
+\end{table}
+
+Vemos entonces que tenemos 7 variables en total, expresadas en terminos de 2 unidades fundamentales, longitud ($L$) y tiempo ($T$), por lo que, adimensionalizando el sistema, podremos reducir el problema a $7-2 = 5$ variables. Ahora, como debemos eliminar \textbf{dos} variables, elegimos \textbf{dos} constantes con las cuales podamos normalizar (adimensionalizar) el sistema, para ello, notamos que podemos obtener todas las unidades involucradas en el problema multiplicando y dividiendo las constantes $v_{y0}$ y $g$. Así, definimos nuestro nuevo conjunto de variables adimensionales, denominado $\Pi$-grupo\footnote{El cual no es un grupo en el sentido matemático :c}, dado por \eqref{eq:pigroup}
+\begin{equation} \label{eq:pigroup}
+  \begin{aligned}
+    \Pi_{1} = t\cdot \left( \frac{g}{v_{y0}} \right) = \tau, \quad 
+    \Pi_{2} = v_{y}\cdot \left( \frac{1}{v_{y0}} \right) = \nu_{y},& \quad 
+    \Pi_{3} = v_{y0} \cdot \left( \frac{1}{v_{y0}} \right) = 1, \quad
+    \Pi_{4} = g \cdot \left( \frac{1}{g} \right) = 1, \quad \\
+    \Pi_{5} = \mu \cdot \left( \frac{v_{y0}^{2}}{g} \right) = \tilde{\mu}, \quad
+    \Pi_{6} = y\cdot & \left( \frac{g}{v_{y0}^{2}} \right) = \rho, \quad
+    \Pi_{7} = y_{0} \cdot \left( \frac{g}{v_{y0}^{2}} \right) = \rho_{0}  
+  \end{aligned}
+\end{equation}
+
+De esta manera, podemos reescribir el probelma original en terminos de nuestras nuevas variables, de modo que
+
+\begin{equation}
+  \fracderivat{\nu_{y}}{\tau}{} = -1 -\tilde{\mu} \nu_{y}^{2}, \quad \rho(0) = \rho_{0}, \nu_{y}(0) = 1
+ \end{equation}
+ 
+ De esta manera, podemos deducir que variables son dinámicamente relevantes, con lo cual podemos analizar el problema de manera más eficiente.
+
+ Este proceso es útil, pero realmente se utiliza en dinámica de fluidos. De todas maneras, si quieren analizar un problema físico muy complejo numéricamente, es conveniente que normalizar las variables antes de programarlo, ya que, al reducir el número de variables, podemos, potencialmente, ignorar constantes muy pequeñas comparadas al resto de las variables que aumenten el error numérico (e.g. constante gravitacional para movimiento planetario).
+
+
+  \subsection{Comentarios Sobre Estabilidad}
+\subsubsubsectionanum{Motivación}
+  Consideremos un péndulo simple, colgando desde un pivote conectado por un cable ideal (indeformable). Es relativamente fácil ver que la ecuación que rige la cinemática del sistema es:
+  \begin{equation}
+    \theta'' + \frac{g}{l} \sin(\theta) = 0, \label{eq:pendulum}
+  \end{equation}
+ donde $\theta \in (-\pi, \pi]$ es el ángulo que forma el péndulo con la vertical (medido en sentido antihorario), $g$ es la aceleración por fuerza de gravedad y $l$ es la longitud del cable. 
+Generalmente, se suele realizar una aproximación para ángulos pequeños tal que $\sin(\theta) \approx \theta$, de modo que la ecuación a resolver es:
+$$
+\theta'' + \frac{g}{l}\theta = 0,
+$$
+la cual es una ecuación diferencial ordinaria tipo oscilador armónico con soluciones conocidas. Sin embargo, puesto que ya tiene conocimientos para abordar numéricamente estos problemas, podemos adentrarnos al análisis de problemas como \eqref{eq:pendulum} , los cuales no tienen soluciones analíticas. Puesto que ya contamos con las herramientas para aproximar numéricamente su trayectoria, vamos a centrarnos en el análisis de la estabilidad de soluciones, puntos de equilibrio y métodos para abordar estas preguntas. 
+ \subsubsection{Criterio de la Derivada}
+ Este criterio rescata directamente las nociones básicas de cálculo en una variable para analizar la \textbf{naturaleza de los puntos de una solución}. Consideremos el caso del péndulo simple. Ya sea por medio de un método de búsqueda de ceros o por medio de un análisis físico, es fácil ver que existen dos puntos críticos para el sistema: cuando el péndulo está completamente en reposo ($\theta = 0$), o el caso contrario cuando está verticalmente hacia arriba ($\theta = \pi$). Vale la pena recordar que, para un $x_1$ tal que $V'(x_1) = 0$ (punto crítico), se tiene :
+ \begin{itemize}
+   \item Si $V''(x_1)<0$, entonces $x_1$  es un punto crítico \textbf{asintóticamente estable} (es decir, para tiempos grandes, el sistema tiende a este punto).
+   \item Si $V''(x_1)>0$, entonces el punto crítico es \textbf{inestable} (es decir, dadas condiciones iniciales cercanas a este punto, el sistema tiende a alejarse de él, y dependiendo de la naturaleza del problema, en dirección al punto de equilibrio estable).
+   \item Si $V''(x_1)=0$, entonces el criterio es no concluyente y requerimos de otro criterio para determinar la naturaleza del punto.
+ \end{itemize}
+Donde $V$ generalmente es la energía potencial del sistema. En nuestro caso, dada la geometría del problema, es fácil ver que $V(\theta) = -\omega^2 \cos(\theta)$, con $\omega^2 = g/l$. Es fácil chequear que $0$ corresponde a un punto de equilibrio estable y $\pi$ a uno inestable. Generalmente tenemos información respecto del potencial, por lo que la dificultad recae en encontrar donde sus derivadas se anulan. Para esto podemos utilizar el método de la bisección una vez obtenida la primera derivada para obtener los puntos críticos. Luego, podemos ingresarlos a la segunda derivada del potencial para así obtener su clasificación. 
+ \subsubsection{Sistemas Autónomos*}
+
+ \subsubsection{Funciones de Lyapunov*}
+

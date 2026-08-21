@@ -1,0 +1,244 @@
+\section{Interpolación y ajustes}
+
+Como mencionamos muy anteriormente, muchas veces no tendremos el lujo de lidiar con funciones definidas analíticamente en todos sus puntos, en lugar de eso, tendremos algun conjunto discreto de puntos $(x_{i}, f_{i})_{i = 0, \cdots, N}$. En estos casos podríamos querer hacer una de dos cosas: interpolar, o bien, ajustar.
+
+\subsection{Interpolación de Lagrange}
+La interpolación consiste en encontrar una función que pase por todos y cada uno de los puntos dados. En estricto rigor estamos llenando el espacio entre medio de los puntos. Si le suena familiar, es porque esto es lo que hacen los modelos de lenguaje (Gemini, ChatGPT, Claude, etc); la diferencia es que estos lo hacen con sets de datos enormes. Ahora, dados un conjunto arbitrario de puntos $(x_{i}, f_{i})_{i=0,\cdots ,N}$ siempre podemos encontrar un polinomio de grado menor o igual a $N$ que interpole los puntos, es decir
+\begin{equation} \label{eq:kronecond}
+  f_{i} = p(x_{i})
+\end{equation}
+Podemos proponer una combinación lineal de polinomios de la forma
+\begin{equation} \label{eq:interpol}
+  L(x) = \sum_{j = 0}^{N}f_{j}\ell_{j}(x)
+ \end{equation}
+ imponiendo la condición
+ \begin{equation} \label{eq:kronecker}
+   \ell_{j}(x_{i}) =
+   \begin{cases}
+     1, & i = j \\
+     0, & i \neq j
+   \end{cases}
+  \end{equation}
+con tal que se cumpla \eqref{eq:kronecond}. Podemos encontrar que los polinomios $\ell_{j}(x)$, denominados \textbf{polinmios base de Lagrange}, son dados por:
+
+\begin{align}
+  \ell_{j}(x) &= \left( \frac{x-x_{0}}{x_{j} - x_{0}} \right) \left( \frac{x-x_{1}}{x_{j} - x_{1}} \right) \cdots \left( \frac{x-x_{j-1}}{x_{j} - x_{j-1}} \right) \left( \frac{x-x_{j+1}}{x_{j} - x_{j+1}} \right) \cdots \left( \frac{x-x_{N}}{x_{j} - x_{N}} \right) \\
+              &= \prod_{i = 0, i \neq j}^{N}\left( \frac{x - x_{i}}{x_{j} - x_{i}} \right)
+ \end{align}
+
+y forman \eqref{eq:interpol}, denominado \textbf{polinomio interpolador de Lagrange}.
+
+\insertimage[\label{fig:lagrangeint}]{./img/interpol/lagrange.pdf}{width=12cm}{Conjunto de puntos interpolados por Lagrange y función original.}
+
+\subsection{Matriz de Vandermonde}
+
+En la sección anterior, logramos interpolar un conjunto de puntos utilizando una combinación lineal de polinomios (vea \eqref{eq:interpol}), por lo que es natural preguntarse si existe algun otro tipo de función interpoladora. La respuesta es que podemos interpolar con cualquier tipo de función que forme una \textbf{base del espacio de funciones}. Consideremos que queremos interpolar una un conjunto de puntos $(x_{j}, f_{j})$ por medio de una función $p(x)$ tal que
+\begin{equation*}
+  f_{j} = p(x_{j})
+\end{equation*}
+
+tenemos que
+\begin{align}
+  p(x) &= \sum_{i = 0}^{N}p_{i}\varphi_{i}(x) \\
+       &= p_{0} \varphi_{0}(x) + p_{1} \varphi_{1}(x) + \cdots + p_{N} \varphi_{N}(x)
+\end{align}
+
+Así, tenemos el sistema de ecuaciones
+\begin{equation}
+  f_{j} = p_{0} \varphi_{0}(x_{j}) + p_{1} \varphi_{1}(x_{j}) + \cdots + p_{N} \varphi_{N}(x_{j})
+ \end{equation}
+donde queremos encontrar los $p_{j}$. Matricialmente tenemos que
+\begin{equation} \label{eq:vandercasi}
+\begin{bmatrix}
+  \varphi_{0}(x_{0}) & \varphi_{1}(x_{0}) & \cdots & \varphi_{N}(x_{0}) \\
+  \varphi_{0}(x_{1}) & \varphi_{1}(x_{1}) & \cdots & \varphi_{N}(x_{1}) \\ 
+  \vdots & \vdots & \ddots & \vdots \\
+  \varphi_{0}(x_{N}) & \varphi_{1}(x_{N}) & \cdots & \varphi_{N}(x_{N}) \\
+\end{bmatrix}
+\begin{bmatrix}
+  p_{0} \\ p_{1} \\ \vdots \\ p_{N}
+\end{bmatrix}
+  =
+\begin{bmatrix}
+  f_{0} \\ f_{1} \\ \vdots \\ f_{N}
+\end{bmatrix}
+\end{equation}
+
+De esta manera, reducimos el problema a resolver el sistema encontrando la inversa de la matriz $\varphi_{i}(x_{j})$. Finalmente, todo este proceso es una generalización de encontrar los coeficientes de una serie que aproxime una función, y es analogo a encontrar los coeficientes de una serie de Taylor. El tipo de serie por el cual estemos interpolando depende de como elijamos la función $\varphi_{n}(x)$, por ejemplo
+\begin{itemize}
+  \item Serie de Fourier: $\varphi_{n}(x) = \exp^{in \pi x /L}$
+  \item Serie de polinomios de Lagrange: $\varphi_{n}(x) = \ell_{n}(x)$
+  \item Serie de Legendre: $\varphi_{n}(x) = P_{n}(x)$ (Polinomios de Legendre) 
+\end{itemize}
+
+\subsubsection{Casos particulares interesantes}
+Si elejimos los polinomios de grado $n$ como nuestra base de funciones, es decir, $\varphi_{n}(x) = x^{n}$, la matriz del lado izquierdo de \eqref{eq:vandercasi} se convierte en la matriz \eqref{eq:vandermonde}
+\begin{equation} \label{eq:vandermonde}
+  \begin{bmatrix}
+    1 & x_{0} & x_{0}^{2} & \cdots & x_{0}^{N} \\
+    1 & x_{1} & x_{1}^{2} & \cdots & x_{1}^{N} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    1 & x_{N} & x_{N}^{2} & \cdots & x_{N}^{N} 
+  \end{bmatrix}
+\end{equation}
+denominada \textbf{Matriz de Vandermonde}.
+
+Alternativamente, si hacemos que $\varphi_{n}(x) = \ell_{n}(x)$, por la propiedad \eqref{eq:kronecker}, la matriz izquierda de \eqref{eq:vandercasi} se convierte en la matriz identidad de $N\times N$, lo que reafirma la condición \eqref{eq:kronecond}.
+
+\subsection{Splines}
+
+Si interpolamos un conjunto de puntos con una sola función para todo el rango de los puntos, podemos encontrarnos con el \textbf{fenómeno de Gibbs}, como muestra la figura \ref{fig:gibbs}. Esto significa que la función interpoladora oscila o alcanza valores muy altos entre dos puntos adyacentes.
+
+\insertimage[\label{fig:gibbs}]{./img/interpol/gibbs.pdf}{scale = 0.75}{Fenómeno de Gibbs causado por interpolación de Lagrange.}
+
+Existen varias maneras de mitigar este fenómeno, como utilizar nodos no equidistantes (ver \textbf{Nodos de Gauss-Chebyshev}), o bien, si no queremos modificar los puntos, podemos realizar una interpolación "por partes", es decir, podemos interpolar el espacio entre subconjuntos de puntos exigiendo que todas las interpolaciones sean continuas y suficientemente\footnote{El significado de "suficiente" dependerá del tipo de spline que queramos utilizar.} derivables entre conjuntos de puntos adyacentes, es decir, que la unión de las interpolaciones sea suave. En general, dado un conjunto de puntos $(x_{i}, y_{i})$, una \textbf{spline} será un polinomio de grado $k$, definido por tramos, que debe ser $k-1$ veces continuamente diferenciable. En la practica, se suelen utilizar \textit{cubic splines}, es decir, debemos interpolar cada subintervalo de nuestro intervalo con un polinomio de grado 3, el cual debe ser continuo y dos veces continuamente diferenciable en los nodos.
+
+Por ejemplo, consideremos que queremos interpolar un conjunto de datos $[x_{1}, x_{2}, x_{3}]$, $[y_{1}, y_{2}, y_{3}]$ utilizando cubic splines. Significa que queremos interpolar los subintervalos $[x_{1}, x_{2}]$ y $[x_{2}, x_{3}]$ con polinomios de grado 3, esto es
+
+\begin{equation}
+  p_{1}(x) = a_{1}x^{3} + a_{2}x^{2} + a_{3}x + a_{4}, \quad 
+  p_{2}(x) = b_{1}x^{3} + b_{2}x^{2} + b_{3}x + b_{4}
+ \end{equation}
+
+Ahora, si imponemos nuestras condiciones de que las interpolaciónes sean continuas y dos veces diferenciables, tendremos:
+\begin{align}
+  p_{1}(x_{1}) = a_{1}x^{3}_{1} + a_{2}x^{2}_{1} + a_{3}x_{1} + &a_{4} = y_{1}, \quad 
+  p_{2}(x_{2}) = b_{1}x^{3}_{2} + b_{2}x^{2}_{2} + b_{3}x_{2} + b_{4} = y_{2} \\
+  p^{\prime}_{1}(x_{2}) = p^{\prime}_{2}(x_{2}), &\quad 3a_{1}x^{2}_{2} + 2a_{2}x_{2} + a_{3} = 3b_{1}x^{2}_{2} + 2b_{2}x_{2} + b_{3} \\
+  p^{\prime \prime}_{1}(x_{2}) = p^{\prime \prime}_{2}(x_{2}), &\quad 6a_{1}x_{2} + 2a_{2} = 6b_{1}x_{2} + 2b_{2}
+ \end{align}
+
+Ahora, vemos que tenemos 8 variables, y solo 6 ecuaciones, por lo que nuestras condiciones aún son insuficientes. Para completar el sistema debemos introducir una útlima condicion sobre el valor de la segunda derivada en los extremos ($x_{1}$ y $x_{3}$), en estricto rigor podemos elegir cualquier valor, pero generalmente se escoge que
+\begin{equation} \label{eq:natcond}
+  p_{1}^{\prime \prime}(x_{1})=0, \quad p_{2}^{\prime \prime}(x_{3}) = 0
+ \end{equation}
+
+Las ecuaciones \eqref{eq:natcond} se denominan \textbf{condición natural}, y al imponerla nuestra spline se denomina una \textbf{spline natural}.
+
+\subsection{Ajustes}
+A diferencia de una interpolación, un ajuste busca la función que más se acerque a todos los puntos de un conjunto de puntos, es decir, la curva que mejor represente la tendencia de la distribución de puntos. Si por alguna razón sabemos que los datos deberían seguir una tendencia en especifico, podemos establecer un modelo y ajustar los parametros del mismo para encontrar los valores de estos que se ajusten mejor a los datos.
+
+\subsubsection{Regresión Lineal}%\label{sub:Regresión Lineal}
+Comenzamos con el modelo más simple, dado un conjunto de puntos $(x_{i}, y_{i})$, buscamos los valores para los parámetros $\alpha_{0}$ y $\alpha_{1}$ tal que la curva de la forma \eqref{eq:linmod} se ajusta mejor a los puntos.
+\begin{equation} \label{eq:linmod}
+  y = \alpha_{0} + \alpha_{1}x
+ \end{equation}
+Para ello, notamos que, bajo este modelo, podemos escribir una relación para $x_{i}$ e $y_{i}$ como
+
+\begin{equation}
+  y_{i} = \alpha_{0} + \alpha_{1}x_{i} + \epsilon_{i}
+ \end{equation}
+
+ donde $\epsilon_{i}$ es el error entre el valor predecido por el modelo, y el dato real, denominado \textbf{residuo}. Ahora, la curva que mejor se ajuste a los datos debería tambien minimizar el valor de los residuos, existen muchas maneras de cuantificar esto, pero nosotros utilizaremos el método de mínimos cuadrados, de modo que debemos minimizar la función $\chi^{2}$, definida por
+
+ \begin{equation}
+   \chi^{2} = \sum_{i=1}^{N} \epsilon_{i}^{2} = \sum_{i=1}^{N} (y_{i} -\alpha_{0} - \alpha_{1}x_{i} )^{2}
+  \end{equation}
+
+Como estamos variando los \textbf{parámetros} $\alpha_{0}$  y $alpha_{1}$, tenemos que $\chi^{2} = \chi^{2}(\alpha_{0}, \alpha_{1})$
+
+\begin{align}
+  \fracdpartial{\chi^{2}}{\alpha_{0}} &= -2\sum_{i=1}^{N}(y_{i} - \alpha_{0} - \alpha_{1}x_{i}) = 0, \\
+  \fracdpartial{\chi^{2}}{\alpha_{1}} &= -2\sum_{i=1}^{N}(y_{i} - \alpha_{0} - \alpha_{1}x_{i})x_{i} = 0
+\end{align}
+
+de modo que, distribuyendo la sumatoria, obtenemos el sistema de ecuaciones lineales
+
+\begin{align}
+  N\alpha_{0} + \left( \sum_{i=1}^{N}x_{i} \right)\alpha_{1} &= \sum_{i=1}^{N}y_{i} \\
+  \left( \sum_{i=1}^{N}x_{i} \right) \alpha_{0} + \left( \sum_{i=1}^{N}x_{i}^{2} \right)\alpha_{1} &= \sum_{i=1}^{N}y_{i}x_{i}
+\end{align}
+
+Para ahorrar un poco de notación, dividimos ambas ecuaciones por $N$, y notamos que el promedio de un conjunto de $N$ elementos es dado por $\overline{x} = \sum_{i=1}^{N}x_{i}/N$. Así,
+
+\begin{align}
+  \alpha_{0} + \overline{x}\alpha_{1} &= \overline{y} \\
+  \overline{x}\alpha_{0} + \overline{x^{2}}\alpha_{1} &= \overline{xy}
+\end{align}\footnote{Notar que $\overline{x^{2}} \neq \overline{x}^{2}$, el primero es el \textbf{promedio de los cuadrados}, y el último el \textbf{cuadrado de los promedios}}
+matricialmente,
+\begin{equation} \label{eq:matsys}
+  \begin{pmatrix}
+    1 &  \overline{x} \\
+    \overline{x} & \overline{x^{2}}
+  \end{pmatrix}
+  = 
+  \begin{pmatrix}
+    \overline{y} \\
+    \overline{xy}
+  \end{pmatrix}
+ \end{equation}
+De este modo, reducimos el problema a resolver un sistema de ecuaciones lineales. En general, la solución al sistema \eqref{eq:matsys} será
+
+\begin{equation}
+  \alpha_{0} = \overline{y} - \alpha_{1}\overline{x}, \quad \alpha_{1} = \frac{\overline{xy} - (\overline{x})(\overline{y})}{\overline{x^{2}} - \overline{x}^{2}}
+ \end{equation}
+
+ Pero generalmente no es conveniente resolver el sistema de forma analítica, en lugar de eso, podemos utilizar \textbf{python}! En efecto,
+
+ \begin{sourcecode}[\label{syspy}]{python}{Resolución del sistema lineal \eqref{eq:matsys} en python.}
+import numpy as np
+
+#datos 100% inventados, pero podrían ser el resultado de un experimento!
+xi = np.array([1, 2, 3, 4, 5])
+yi = np.array([2.5, 3.8, 6.7, 7.9, 10.1]) #tendencia casi lineal
+
+#Definimos las variables necesarias
+xprom = np.mean(xi) #promedio de los x
+yprom = np.mean(yi) #promedio de los y
+
+x2prom = np.mean(xi**2) #promedio de los x^{2}
+xyprom = np.mean(xi*yi) #promedio de los x*y
+
+#definimos la matriz de parametros (lado izquierdo de (95))
+A = np.array([[1, xprom],
+             [xprom, x2prom]])
+
+#definimos la matriz de terminos "libres" (lado derecho de (95))
+B = np.array([[yprom],
+             [xyprom]])
+
+a0, a1 = np.linalg.solve(A, B) #utilizamos linalg.solve para resolver el sistem con numpy!
+  \end{sourcecode}
+
+Graficando los puntos del código \ref{syspy}, y la recta definida por los parámetros obtenidos al resolver el sistema, obtenemos la figura \ref{fig:line_reg}.
+
+\insertimage[\label{fig:line_reg}]{./img/interpol/line_reg.pdf}{scale = 0.75}{Ajuste lineal para distribución de puntos.}
+
+De este modo, hemos encontrado la recta que mejor se ajusta a la tendencia de los datos. Ahora, podemos generalizar este proceso para un ajuste polinomial de grado $n$, en este caso la función $\chi^{2}$ tendrá la forma
+\begin{equation}
+  \chi^{2} = \sum_{i=1}^{N}(y_{i} - f(x_{i})^{2})^{2} = \sum_{i=1}^{N}(y_{i} - a_{0} - a_{1}x_{i} - a_{2}x^{2}_{i} - \cdots - a_{n}x^{n}_{i})
+ \end{equation}
+
+ Si derivamos con respecto a cada $a_{j}$ e igualamos cada derivada a 0, obtendremos el sistema
+
+ \begin{equation} \label{eq:polsys}
+   \begin{pmatrix}
+     N & \sum x_{i} & \sum x_{i}^{2} & \cdots & \sum x_{i}^{n} \\
+     \sum x_{i} & \sum x_{i}^{2} & \sum x_{i}^{3} & \cdots & \sum x_{i}^{n+1} \\
+     \sum x_{i}^{2} & \sum x_{i}^{3} & \sum x_{i}^{4} & \cdots & \sum x_{i}^{n+2} \\
+     \vdots & \vdots & \vdots & \ddots & \vdots \\
+     \sum x_{i}^{n} & \sum x_{i}^{n+1} & \sum x_{i}^{n+2} & \cdots & \sum x_{i}^{2n}
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{0} \\
+      a_{1} \\
+      a_{2} \\
+      \vdots \\
+      a_{n}
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+      \sum y_{i} \\
+      \sum x_{i}y_{i} \\
+      \sum x_{i}^{2}y_{i} \\
+      \vdots \\
+      \sum x_{i}^{n}y_{i}
+    \end{pmatrix}
+  \end{equation}
+
+Si resolvemos el sistema \eqref{eq:polsys}, obtendremos los valores de los parámetros del polinomio de grado $n$ que se ajusta mejor a la distribución de puntos.
+
+\subsubsection{Método de mínimos cuadrados ponderado}%\label{sub:Método de mínimos cuadrados ponderado}
+
+
+  

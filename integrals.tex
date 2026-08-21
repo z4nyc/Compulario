@@ -1,0 +1,91 @@
+\section{Integración numérica}
+\subsection{Introducción}
+Continuando con la motivación de este apunte, necesitamos evaluar  númericamente la integral de una función cualquiera (continua en el intervalo $a<x<b $), para ello se puede aproximar mediante la suma de áreas (rectańgulos, trapezoides, etc) e interpolación, como veremos a continuación.
+
+\subsection{Método Newton-Cotes}
+El método Newton-Cotes consiste en evaluar la integral como la suma de áreas (rectángulos, trapezoides,etc) en subintervalos. Considerando una cantidad de $n$ datos discretos (o nodos) y suponiendo $(x_i,f(x_i))$ son conocidos, con $i=0,1,2,...,n-1,n$ en un intervalo $[a,b]$ con $x_0=a$ y $x_n=b$ ,es decir: $a\leq x_i<...<x_n \leq b$. 
+Donde para subintervalos equiespaciados.$x_i$ corresponde al i-esimo punto a evaluar: $x_i=a+ih$ y $h=\frac{b-a}{n-1}$
+
+Estas áreas se pueden obtener mediante Interpolación, teniendo que  de manera general:
+
+\begin{equation}
+  \int_a^b f(x) dx \approx \sum_{i=0}^{n-1} w_i f(x_i) = \sum_{i=0}^{n-1} \left(\int_a^b \ell_i(x)dx\right)f(x_i) \label{nc-gral}
+\end{equation}
+
+donde $w_i$ son los pesos, que corresponden a la integral de los polinomios base de Lagrange (Ver capitulo de Interpolación). 
+
+ \subsection{Regla del rectángulo}
+La primera idea que se viene a la mente al tratar de aproximar una integral es mediante el área de un rectángulo:
+
+\begin{equation*}
+  \int_a^b f(x)dx \approx \frac{b-a}{2}f(a) = hf(a)   
+\end{equation*}
+
+claramente no es para nada preciso, por lo que subdividiremos el interavalo $[a,b]$ en $n-1$ subintervalos y sumaremos el área de cada rectańgulo (regla compuesta):
+
+\begin{equation*}
+  \int_a^b f(x)dx = \sum_{i=0}^{n-1} f(x_i)(x_{i+1}-x_i)
+\end{equation*}
+
+con $h_i= x_{i+1}-x_i$ el ancho, ahora si son equiespaciados entonces:
+
+\begin{equation*}
+  \int_a^b f(x)dx = \sum_{i=0}^{n-1} \frac{b-a}{n-1} f(x_i) = \sum_{i=0}^{n-1} hf(x_i)
+  \end{equation*}
+
+También se puede ver como una interpolación de grado 0, con esto en mente podemos calcular el error expandiendo en Serie de Taylor alrededor de $x_i$ hasta primer orden, teniendo así:
+
+\begin{align*}
+  f(x) &\approx f(x_i) + f^\prime(\xi)(x-x_i) \\ 
+\int_{x_i}^{x_{i+1}} f(x)dx &= \int_{x_i}^{x_{i+1}} f(x_i) dx + \int_{x_i}^{x_{i+1}} f^\prime(\xi)(x-x_i)dx \\
+   &=  hf(x_i) +  \int_0^{x_{i+1}-x_i} f^\prime(\xi)u du\\
+   &= hf(x_i) + \frac{1}{2} h^2 f^\prime(\xi)
+\end{align*}
+
+donde se realizó el cambio de variable $u=x-x_i$ y el ancho del intervalo $h=x_{i+1}-x_i$, y donde el error corresponde a:
+
+\begin{equation*}
+  \mathcal{O}(h^2) = \frac{1}{2}h^2 f^\prime(\xi)
+\end{equation*}
+
+ teniendo así que:
+
+ \begin{equation*}
+   \int_{x_i}^{x_{i+1}} f(x) dx = hf(x_i) + \mathcal{O}(h^2)
+ \end{equation*}
+
+ tomando en cuenta la integral original, tenemos:
+
+\begin{equation*}
+  \int_a^b f(x) dx = \sum_{i=0}^{n-1}hf(x_i) + \mathcal{O}(n h^2)
+ \end{equation*}
+
+ %\subsection{Regla del punto medio}
+
+ \subsection{Regla del trapezoide}
+Otra forma más precisa es aproximar la curva mediante el área de un trapezoide, para $f(x)$ con $x_i<x<x_{i+1}$, se tiene:
+
+\begin{equation*}
+  \int_{x_i}^{x_{i+1}} f(x)dx \approx (x_{i+1}-x_i)f(x_0) + \frac{1}{2}(x_{i+1}-x_i)(f(x_{i+1})-f(x_i))= \frac{h}{2}(f(x_i)+f(x_{i+1}))
+\end{equation*}
+
+
+regla compuesta
+\begin{equation*}
+  \int_a^b f(x)dx= \sum_{i=0}^{n-1} \int_{x_i}^{x_{i+1}} f(x)dx \approx \frac{h}{2}f(x_0) +hf(x_1) +...+hf(x_{n-2}) +\frac{h}{2}f(x_{n-1})
+\end{equation*}
+
+error
+\begin{equation*}
+  f(x) \approx f(x_i) + f^\prime (x-x_i) + \frac{1}{2}f''(x_i) (x-x_i)^2
+\end{equation*}
+
+ \subsection{Regla de Simpson}
+Para este caso se hace una interpolación de $f(x)$ de grado 2
+
+\begin{equation*}
+  \int_{x_0}^{x_1} f(x) dx \approx \frac{h}{3} [f(x_0)+4f(x_M)+f(x_1)]
+\end{equation*}
+ con $x_M=\frac{x_1-x_0}{2}$
+ 
+ %\subsection{Cuadraturas de Gauss}

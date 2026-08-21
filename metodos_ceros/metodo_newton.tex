@@ -1,0 +1,68 @@
+\subsection{Método de Newton}
+¿Qué ocurre si deseamos utilizar información de la propia función?
+
+Consideraremos buscar el cero de nuestra función f(x) a través del uso de la serie de Taylor.
+
+Para esto, tomemos en nuestro algoritmo la función $f(x)$, si desarrollamos en segundo orden la serie de Taylor para el cero, se puede notar que:
+
+\begin{equation}
+f(x_0)= f(x) + (x - x_0) \cdot f'(x) + (x - x_0)^2 \cdot \frac{f''(x)}{2} + ...
+\end{equation}
+
+Pero por definición, la función evaluada en nuestro punto $x_0$ debe ser cero, así, si aproximamos la serie:
+
+\begin{equation}\label{Taylor_newton_met}
+0 \approx f(x) + (x-x_0) \cdot f'(x)
+\end{equation}
+
+Podemos despejar así $x_0$, donde:
+
+\begin{equation}
+x_0 = x - \frac{f(x)}{f'(x)}
+\end{equation}
+
+Esto, nos ofrece un algoritmo que seguir, a modo de poder aproximarse a través de iteraciones hasta superar la tolerancia establecida.
+
+Notar que a diferencia del método de la bisección, aquí se hace uso de la derivada, la cual es útil para determinar con mayor rapidez el cero con respecto a la tolerncia establecida, dando así un método eficiente y que hace uso de menores iteraciones con respecto a la bisección.
+
+Consideraremos un punto inicial, tal como el valor inicial del intervalo dentro del cual estamos buscando el cero, para este caso, será $x_n$, así, la iteración del algoritmo nos dará un valor cercano al cero, siendo este denotado $x_{n+1}$, así:
+
+\begin{equation}
+x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}
+\end{equation}
+
+Un ejemplo de la implementación de este algoritmo es el siguiente, consideramos una función $f(x) = x^3 -  5x$, y su derivada $f'(x) = 3x^2 - 5$, así:
+
+\begin{lstlisting}
+tolerancia = 1e-12
+
+f = lambda x: x**3 -5*x # Se define la función a utilizar
+fprima = lambda x: 3*x**2 - 5
+
+def met_newton(f,a,b,tolerancia):
+    zeros = []
+    int = np.linspace(a,b,10)
+    print(int)
+    for i in range(int.size-1): 
+
+        if f(int[i])*f(int[i+1]) <= 0:
+            a,b = int[i:i+2]
+            fa, fprima_a = f(a), fprima(a)
+            m = 0
+            while (abs(fa/fprima_a )) >= tolerancia:
+                b = a - fa/fprima_a
+                a = b
+                fa, fprima_a = f(a), fprima(a)
+                m +=1
+            print("Existe un cero",b,"con iteraciones de",m,"veces")
+
+
+met_newton(f,-3,3,tolerancia)
+
+\end{lstlisting}
+
+
+Notar que si la derivada se acerca a cero, la cantidad de iteraciones comenzará a aumentar, puesto que la velocidad con la que avanza el algoritmo comienza a disminuir.
+
+A su vez, es importante mencionar el error que conlleva este método, notar que de (\ref{Taylor_newton_met}), aproximamos en segundo orden, así, el término $O(\delta x^2)$ desaparece de la serie de Taylor. Es importante mencionar esto puesto que, si bien el método converge de forma rápida, muchas veces podría no hacerlo debido a que los términos de ordenes superiores comienzan a generar diferencias notables con respecto a la aproximación hecha
+

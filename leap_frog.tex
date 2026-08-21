@@ -57,7 +57,7 @@ es decir, podemos reescribir el problema como:
     \vec{f}(\vec{x},t) = \begin{pmatrix} v(t) \\ -\omega^2 y(t) -g  \end{pmatrix}, \qquad 
       \frac{d\vec{x}}{dt} = \vec{f}(\vec{x},t).
 \end{equation}
-De esta forma, el algoritmo relevante del método es\footnote{Este código es un esquema. Para ver código real, puede visitar \textbf{Link del repo cuando esté terminado}}:
+De esta forma, el algoritmo relevante del método es\footnote{Este código es un esquema. Para ver código real, puede visitar el repositorio.}:
 \begin{sourcecode}{python}{Algoritmo básico del método de Euler.}
   def f(x, omega=1.0, g = 9.8): # creamos el vector f, acá hay que definir omega
       y, v = x # desempaquetamos las variables
